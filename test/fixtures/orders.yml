@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  organization: one
+  order_cycle: one
+  orderer_name: MyString
+  pickup_name: MyString
+  status: MyString
+  submitted_at: 2026-04-13 23:15:35
+
+two:
+  user: two
+  organization: two
+  order_cycle: two
+  orderer_name: MyString
+  pickup_name: MyString
+  status: MyString
+  submitted_at: 2026-04-13 23:15:35

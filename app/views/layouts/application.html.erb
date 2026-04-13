@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "聖明王院道具一括注文" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="min-h-screen bg-stone-100 text-stone-900">
+    <header class="border-b border-stone-200 bg-white/95 backdrop-blur">
+      <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.25em] text-amber-700">Bulk Order</p>
+          <%= link_to "聖明王院道具一括注文", root_path, class: "text-lg font-semibold text-stone-900" %>
+        </div>
+
+        <div class="flex items-center gap-3 text-sm">
+          <%= link_to "確認ガイド", "/test_guide.html", class: "rounded-md px-3 py-2 text-stone-700 hover:bg-stone-100" %>
+
+          <% if current_user %>
+            <span class="rounded-full bg-stone-100 px-3 py-1 text-stone-700">
+              <%= current_user.organization.name %> / <%= current_user.name %>
+            </span>
+            <%= link_to "現在の注文", current_order_path, class: "rounded-md px-3 py-2 text-stone-700 hover:bg-stone-100" %>
+            <%= link_to "履歴", orders_path, class: "rounded-md px-3 py-2 text-stone-700 hover:bg-stone-100" %>
+            <% if current_user.admin? %>
+              <%= link_to "管理", admin_root_path, class: "rounded-md bg-stone-900 px-3 py-2 text-white hover:bg-stone-700" %>
+            <% end %>
+            <%= button_to "ログアウト", session_path, method: :delete, class: "rounded-md border border-stone-300 px-3 py-2 text-stone-700 hover:bg-stone-100" %>
+          <% end %>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-7xl px-6 py-8">
+      <% if notice.present? %>
+        <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"><%= notice %></div>
+      <% end %>
+      <% if alert.present? %>
+        <div class="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800"><%= alert %></div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+  </body>
+</html>

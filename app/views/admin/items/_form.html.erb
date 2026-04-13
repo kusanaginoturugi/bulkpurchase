@@ -1,0 +1,44 @@
+<%= form_with model: [ :admin, item ], class: "mt-6 space-y-4" do |form| %>
+  <div class="grid gap-4 md:grid-cols-2">
+    <div>
+      <%= form.label :code, "コード", class: "text-sm font-medium text-stone-700" %>
+      <%= form.text_field :code, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
+    </div>
+    <div>
+      <%= form.label :name, "名称", class: "text-sm font-medium text-stone-700" %>
+      <%= form.text_field :name, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
+    </div>
+  </div>
+  <div class="grid gap-4 md:grid-cols-2">
+    <div>
+      <%= form.label :unit, "単位", class: "text-sm font-medium text-stone-700" %>
+      <%= form.text_field :unit, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
+    </div>
+    <div>
+      <%= form.label :center_category, "護摩センター区分", class: "text-sm font-medium text-stone-700" %>
+      <%= form.select :center_category, Item.center_categories.keys.map { |value| [value, value] }, {}, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
+    </div>
+  </div>
+  <div class="grid gap-4 md:grid-cols-2">
+    <div>
+      <%= form.label :special_handling_type, "特殊設定", class: "text-sm font-medium text-stone-700" %>
+      <%= form.select :special_handling_type, Item.special_handling_types.keys.map { |value| [value, value] }, {}, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
+    </div>
+    <div>
+      <label class="mt-9 flex items-center gap-3 text-sm text-stone-700">
+        <%= form.check_box :active %>
+        有効
+      </label>
+    </div>
+  </div>
+  <% if item.persisted? %>
+    <div>
+      <label class="text-sm font-medium text-stone-700" for="variant_names">種別候補（1行1件）</label>
+      <%= text_area_tag :variant_names, item.item_variants.order(:display_order).pluck(:name).join("\n"), rows: 4, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
+    </div>
+  <% end %>
+  <div class="flex gap-3">
+    <%= form.submit class: "rounded-xl bg-stone-900 px-5 py-3 text-sm font-medium text-white" %>
+    <%= link_to "一覧へ戻る", admin_items_path, class: "rounded-xl border border-stone-300 px-5 py-3 text-sm font-medium text-stone-700" %>
+  </div>
+<% end %>

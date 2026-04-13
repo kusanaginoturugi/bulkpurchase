@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  code: MyString
+  name: MyString
+  value: 1
+  refund: 1
+  unit: MyString
+  center_category: MyString
+  special_handling_type: MyString
+  active: false
+
+two:
+  code: MyString
+  name: MyString
+  value: 1
+  refund: 1
+  unit: MyString
+  center_category: MyString
+  special_handling_type: MyString
+  active: false

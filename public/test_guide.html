@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>動作確認ガイド | 聖明王院道具一括注文</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f5f4;
+        --panel: #ffffff;
+        --line: #e7e5e4;
+        --text: #1c1917;
+        --muted: #57534e;
+        --accent: #b45309;
+        --accent-soft: #fef3c7;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top left, rgba(180, 83, 9, 0.12), transparent 28rem),
+          linear-gradient(180deg, #fafaf9 0%, var(--bg) 100%);
+        color: var(--text);
+        font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+        line-height: 1.7;
+      }
+
+      a {
+        color: #92400e;
+      }
+
+      .shell {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 32px 24px 80px;
+      }
+
+      .hero {
+        padding: 32px;
+        border: 1px solid var(--line);
+        border-radius: 32px;
+        background: linear-gradient(135deg, #1c1917 0%, #44403c 100%);
+        color: white;
+        box-shadow: 0 20px 60px rgba(28, 25, 23, 0.12);
+      }
+
+      .eyebrow {
+        margin: 0;
+        font-size: 12px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: #fcd34d;
+        font-weight: 700;
+      }
+
+      h1 {
+        margin: 12px 0 0;
+        font-size: clamp(32px, 4vw, 52px);
+        line-height: 1.1;
+      }
+
+      .lead {
+        margin: 16px 0 0;
+        max-width: 56rem;
+        color: #e7e5e4;
+      }
+
+      .quick-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .quick-links a {
+        display: inline-flex;
+        padding: 12px 16px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        text-decoration: none;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+      }
+
+      .grid {
+        display: grid;
+        gap: 24px;
+        margin-top: 24px;
+      }
+
+      @media (min-width: 960px) {
+        .grid.two {
+          grid-template-columns: 1.2fr 0.8fr;
+        }
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        padding: 28px;
+        box-shadow: 0 12px 40px rgba(28, 25, 23, 0.05);
+      }
+
+      h2 {
+        margin: 0 0 16px;
+        font-size: 28px;
+        line-height: 1.2;
+      }
+
+      h3 {
+        margin: 24px 0 12px;
+        font-size: 20px;
+      }
+
+      p, li {
+        color: var(--muted);
+      }
+
+      ul, ol {
+        padding-left: 1.4rem;
+        margin: 10px 0 0;
+      }
+
+      code, pre {
+        font-family: "JetBrains Mono", "SFMono-Regular", monospace;
+      }
+
+      pre {
+        margin: 14px 0 0;
+        padding: 16px 18px;
+        overflow-x: auto;
+        border-radius: 18px;
+        background: #1c1917;
+        color: #f5f5f4;
+      }
+
+      .pill {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .account {
+        margin-top: 16px;
+        padding: 18px;
+        border-radius: 20px;
+        background: #fafaf9;
+        border: 1px solid var(--line);
+      }
+
+      .account strong {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text);
+      }
+
+      .note {
+        margin-top: 16px;
+        padding: 18px;
+        border-left: 4px solid var(--accent);
+        background: #fffbeb;
+        border-radius: 0 18px 18px 0;
+      }
+
+      .paths li,
+      .checks li {
+        margin-bottom: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">Test Guide</p>
+        <h1>聖明王院道具一括注文<br>動作確認ガイド</h1>
+        <p class="lead">
+          現時点の Rails アプリで、一般ユーザーの注文登録と修正、管理者のマスタ確認と注文確認を一通り試すための手順です。
+        </p>
+        <div class="quick-links">
+          <a href="/">アプリを開く</a>
+          <a href="/session/new">ログイン画面へ</a>
+        </div>
+      </section>
+
+      <div class="grid two">
+        <section class="card">
+          <span class="pill">起動手順</span>
+          <h2>ローカルで動かす</h2>
+          <pre><code>bundle install
+bin/rails db:prepare
+bin/rails server -p 3001</code></pre>
+          <div class="note">
+            <strong>補足</strong>
+            <div>`3000` が使用中なら `3001` など別ポートで起動してください。</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <span class="pill">ログイン情報</span>
+          <h2>初期アカウント</h2>
+          <div class="account">
+            <strong>一般ユーザー</strong>
+            <div>メールアドレス: <code>member@example.com</code></div>
+            <div>パスワード: <code>password</code></div>
+            <div>所属伝道会: 山梨</div>
+          </div>
+          <div class="account">
+            <strong>管理者</strong>
+            <div>メールアドレス: <code>admin@example.com</code></div>
+            <div>パスワード: <code>password</code></div>
+            <div>所属伝道会: 富士山</div>
+          </div>
+        </section>
+      </div>
+
+      <div class="grid">
+        <section class="card">
+          <span class="pill">初期データ</span>
+          <h2>seed 済みデータ</h2>
+          <ul>
+            <li>伝道会: 富士山 / 山梨 / 大仏殿</li>
+            <li>道具: <code>items.csv</code> から取込済み</li>
+            <li>特殊設定: 白陽八卦符は特殊道具として登録済み</li>
+            <li>種別候補: 無地 / 有気復命</li>
+            <li>注文サイクル: 当月分を 1 件作成済み</li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <span class="pill">業務フロー</span>
+          <h2>1. 一般ユーザーが注文する</h2>
+          <ol>
+            <li><code>member@example.com</code> でログイン</li>
+            <li>トップの「現在の注文」を開く</li>
+            <li>注文者名、持ち帰り者名を入力</li>
+            <li>明細で道具コードまたは名称を入力</li>
+            <li>候補から選択して数量を入れる</li>
+            <li>必要なら備考を入力</li>
+            <li>「保存」または「提出する」を押す</li>
+          </ol>
+          <h3>確認ポイント</h3>
+          <ul class="checks">
+            <li>伝道会は `山梨` と表示され、変更できない</li>
+            <li>行追加 / 行削除ができる</li>
+            <li>自由入力として道具名や単位を直接入れられる</li>
+            <li>白陽八卦符を選ぶと種別欄が使える</li>
+            <li>提出後も管理者送信前なら再編集できる</li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <h2>2. 注文修正</h2>
+          <ol>
+            <li>一般ユーザーでログインしたままトップへ戻る</li>
+            <li>既存注文を開く</li>
+            <li>明細や数量を修正</li>
+            <li>再度「保存」または「提出する」を押す</li>
+          </ol>
+          <h3>確認ポイント</h3>
+          <ul class="checks">
+            <li>既存注文が新規作成ではなく更新される</li>
+            <li>同一サイクルで注文が増殖しない</li>
+            <li>注文履歴から詳細が見られる</li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <h2>3. 管理者がマスタを確認する</h2>
+          <ol>
+            <li><code>admin@example.com</code> でログイン</li>
+            <li>右上の「管理」を開く</li>
+            <li>サイクル / 注文 / 伝道会 / ユーザー / 道具 を確認する</li>
+          </ol>
+          <h3>確認ポイント</h3>
+          <ul class="checks">
+            <li>注文サイクルの年月、締切、注文日、必着日を編集できる</li>
+            <li>道具の単位、護摩センター区分、特殊設定を編集できる</li>
+            <li>ユーザーの所属伝道会と権限を編集できる</li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <h2>4. 管理者が注文内容を見る</h2>
+          <ol>
+            <li>管理画面の「注文」を開く</li>
+            <li>一般ユーザーが作成した注文を開く</li>
+            <li>明細内容を確認する</li>
+          </ol>
+          <h3>確認ポイント</h3>
+          <ul class="checks">
+            <li>伝道会、注文者、状態が見える</li>
+            <li>注文明細が一覧で見える</li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <span class="pill">画面一覧</span>
+          <h2>主要 URL</h2>
+          <ul class="paths">
+            <li>ログイン: <a href="/session/new"><code>/session/new</code></a></li>
+            <li>現在の注文: <a href="/current_order"><code>/current_order</code></a></li>
+            <li>注文履歴: <a href="/orders"><code>/orders</code></a></li>
+            <li>管理トップ: <a href="/admin"><code>/admin</code></a></li>
+            <li>管理 / 注文サイクル: <a href="/admin/order_cycles"><code>/admin/order_cycles</code></a></li>
+            <li>管理 / 注文一覧: <a href="/admin/orders"><code>/admin/orders</code></a></li>
+            <li>管理 / 伝道会: <a href="/admin/organizations"><code>/admin/organizations</code></a></li>
+            <li>管理 / ユーザー: <a href="/admin/users"><code>/admin/users</code></a></li>
+            <li>管理 / 道具: <a href="/admin/items"><code>/admin/items</code></a></li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <span class="pill">注意点</span>
+          <h2>既知の状態</h2>
+          <ul>
+            <li>見た目は仮実装で、業務確認優先です</li>
+            <li>メール送信は雛形実装で、実メール設定は未接続です</li>
+            <li>PDF 出力は雛形実装です</li>
+            <li><code>bin/dev</code> は <code>foreman</code> が必要です</li>
+            <li>まずは <code>bin/rails server</code> での確認を推奨します</li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <span class="pill">確認依頼</span>
+          <h2>見てほしい点</h2>
+          <ul>
+            <li>一般ユーザーの入力項目が業務に足りているか</li>
+            <li>白陽八卦符の扱いが現場運用に合っているか</li>
+            <li>管理者画面の項目が不足していないか</li>
+            <li>注文送信前まで修正可能、という運用に問題がないか</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>

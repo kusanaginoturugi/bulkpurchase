@@ -1,0 +1,47 @@
+<%= render "admin/shared/header", title: "注文サイクル詳細", description: @order_cycle.label %>
+
+<section class="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm">
+  <div class="grid gap-4 md:grid-cols-4">
+    <div class="rounded-2xl bg-stone-50 p-4">
+      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">月例</p>
+      <p class="mt-2 font-medium text-stone-900"><%= @order_cycle.cycle_number %></p>
+    </div>
+    <div class="rounded-2xl bg-stone-50 p-4">
+      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">締切</p>
+      <p class="mt-2 font-medium text-stone-900"><%= l(@order_cycle.deadline_at, format: :long) %></p>
+    </div>
+    <div class="rounded-2xl bg-stone-50 p-4">
+      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">注文日</p>
+      <p class="mt-2 font-medium text-stone-900"><%= l(@order_cycle.order_date) %></p>
+    </div>
+    <div class="rounded-2xl bg-stone-50 p-4">
+      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">必着日</p>
+      <p class="mt-2 font-medium text-stone-900"><%= l(@order_cycle.arrival_date) %></p>
+    </div>
+  </div>
+
+  <div class="mt-6 overflow-hidden rounded-3xl border border-stone-200">
+    <table class="min-w-full divide-y divide-stone-200 text-sm">
+      <thead class="bg-stone-50 text-left text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">
+        <tr>
+          <th class="px-4 py-3">伝道会</th>
+          <th class="px-4 py-3">注文者</th>
+          <th class="px-4 py-3">状態</th>
+          <th class="px-4 py-3">明細数</th>
+          <th class="px-4 py-3"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-stone-200">
+        <% @orders.each do |order| %>
+          <tr>
+            <td class="px-4 py-3"><%= order.organization.name %></td>
+            <td class="px-4 py-3"><%= order.orderer_name %></td>
+            <td class="px-4 py-3"><%= order.status %></td>
+            <td class="px-4 py-3"><%= order.order_items.size %></td>
+            <td class="px-4 py-3 text-right"><%= link_to "詳細", admin_order_path(order), class: "font-medium text-stone-900" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</section>

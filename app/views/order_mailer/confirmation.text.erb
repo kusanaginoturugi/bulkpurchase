@@ -1,0 +1,10 @@
+<%= @order.user.name %> 様
+
+注文を受け付けました。
+対象月: <%= @order.order_cycle.label %>
+伝道会: <%= @order.organization.name %>
+注文者名: <%= @order.orderer_name %>
+
+<% @order.order_items.each do |item| %>
+- <%= item.output_name %> / <%= item.quantity %><%= item.unit %> <%= item.notes %>
+<% end %>

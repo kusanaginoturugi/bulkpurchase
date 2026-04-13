@@ -1,0 +1,15 @@
+<section class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <p class="text-xs font-semibold uppercase tracking-[0.25em] text-amber-700">Admin</p>
+    <h1 class="mt-3 text-3xl font-semibold text-stone-900"><%= title %></h1>
+    <p class="mt-2 text-sm text-stone-500"><%= description %></p>
+  </div>
+
+  <nav class="flex flex-wrap gap-2 text-sm">
+    <%= link_to "サイクル", admin_order_cycles_path, class: "rounded-xl border border-stone-300 px-4 py-2 text-stone-700 hover:bg-stone-100" %>
+    <%= link_to "注文", admin_orders_path, class: "rounded-xl border border-stone-300 px-4 py-2 text-stone-700 hover:bg-stone-100" %>
+    <%= link_to "伝道会", admin_organizations_path, class: "rounded-xl border border-stone-300 px-4 py-2 text-stone-700 hover:bg-stone-100" %>
+    <%= link_to "ユーザー", admin_users_path, class: "rounded-xl border border-stone-300 px-4 py-2 text-stone-700 hover:bg-stone-100" %>
+    <%= link_to "道具", admin_items_path, class: "rounded-xl border border-stone-300 px-4 py-2 text-stone-700 hover:bg-stone-100" %>
+  </nav>
+</section>

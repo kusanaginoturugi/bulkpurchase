@@ -1,59 +1,61 @@
-require "csv"
+# frozen_string_literal: true
+
+require 'csv'
 
 def infer_unit(name)
-  return "組" if [ "白陽八卦符", "みろく鵺符" ].any? { |keyword| name.include?(keyword) }
-  return "本" if [ "護摩木", "御柱", "棒" ].any? { |keyword| name.include?(keyword) }
-  return "枚" if [ "札", "符", "人型", "銭型", "金紙", "銀紙", "暦" ].any? { |keyword| name.include?(keyword) }
+  return '組' if %w[白陽八卦符 みろく鵺符].any? { |keyword| name.include?(keyword) }
+  return '本' if %w[護摩木 御柱 棒].any? { |keyword| name.include?(keyword) }
+  return '枚' if %w[札 符 人型 銭型 金紙 銀紙 暦].any? { |keyword| name.include?(keyword) }
 
-  "個"
+  '個'
 end
 
-organization_names = [ "富士山", "山梨", "大仏殿" ]
+organization_names = %w[富士山 山梨 大仏殿]
 organizations = organization_names.index_with do |name|
   Organization.find_or_create_by!(name:) do |organization|
     organization.active = true
   end
 end
 
-admin = User.find_or_initialize_by(email_address: "admin@example.com")
+admin = User.find_or_initialize_by(email_address: 'admin@example.com')
 admin.assign_attributes(
-  name: "管理者",
-  password: "password",
-  password_confirmation: "password",
-  organization: organizations.fetch("富士山"),
+  name: '管理者',
+  password: 'password',
+  password_confirmation: 'password',
+  organization: organizations.fetch('富士山'),
   role: :admin,
   active: true
 )
 admin.save!
 
-sample_user = User.find_or_initialize_by(email_address: "member@example.com")
+sample_user = User.find_or_initialize_by(email_address: 'member@example.com')
 sample_user.assign_attributes(
-  name: "サンプル会員",
-  password: "password",
-  password_confirmation: "password",
-  organization: organizations.fetch("山梨"),
+  name: 'サンプル会員',
+  password: 'password',
+  password_confirmation: 'password',
+  organization: organizations.fetch('山梨'),
   role: :user,
   active: true
 )
 sample_user.save!
 
-CSV.foreach(Rails.root.join("items.csv"), headers: true) do |row|
-  item = Item.find_or_initialize_by(code: row.fetch("code"))
+CSV.foreach(Rails.root.join('items.csv'), headers: true) do |row|
+  item = Item.find_or_initialize_by(code: row.fetch('code'))
   item.assign_attributes(
-    name: row.fetch("name"),
-    value: row.fetch("value").to_i,
-    refund: row.fetch("refund").to_i,
-    unit: infer_unit(row.fetch("name")),
+    name: row.fetch('name'),
+    value: row.fetch('value').to_i,
+    refund: row.fetch('refund').to_i,
+    unit: infer_unit(row.fetch('name')),
     center_category: :other,
-    special_handling_type: row.fetch("name").include?("白陽八卦符") ? :hakuyo_hakke : :none,
+    special_handling_type: row.fetch('name').include?('白陽八卦符') ? :hakuyo_hakke : :none,
     active: true
   )
   item.save!
 end
 
-hakke = Item.find_by(name: "白陽八卦符")
+hakke = Item.find_by(name: '白陽八卦符')
 if hakke
-  [ "無地", "有気復命" ].each_with_index do |name, index|
+  %w[無地 有気復命].each_with_index do |name, index|
     hakke.item_variants.find_or_create_by!(name:) do |variant|
       variant.display_order = index
       variant.active = true

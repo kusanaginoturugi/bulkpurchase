@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 module Admin
   class OrganizationsController < BaseController
-    before_action :set_organization, only: [ :edit, :update ]
+    before_action :set_organization, only: %i[edit update]
 
     def index
       @organizations = Organization.order(:name)
@@ -18,8 +20,7 @@ module Admin
       end
     end
 
-    def edit
-    end
+    def edit; end
 
     def update
       if @organization.update(organization_params)
@@ -30,12 +31,13 @@ module Admin
     end
 
     private
-      def set_organization
-        @organization = Organization.find(params[:id])
-      end
 
-      def organization_params
-        params.require(:organization).permit(:name, :active)
-      end
+    def set_organization
+      @organization = Organization.find(params[:id])
+    end
+
+    def organization_params
+      params.require(:organization).permit(:name, :active)
+    end
   end
 end

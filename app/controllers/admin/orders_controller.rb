@@ -1,14 +1,15 @@
+# frozen_string_literal: true
+
 module Admin
   class OrdersController < BaseController
-    before_action :set_order, only: [ :show, :edit, :update ]
-    before_action :load_organizations, only: [ :edit, :update ]
+    before_action :set_order, only: %i[show edit update]
+    before_action :load_organizations, only: %i[edit update]
 
     def index
       @orders = Order.includes(:organization, :user, :order_cycle).order(created_at: :desc)
     end
 
-    def show
-    end
+    def show; end
 
     def edit
       build_blank_rows if @order.order_items.empty?
@@ -32,30 +33,32 @@ module Admin
     end
 
     private
-      def set_order
-        @order = Order.includes(:organization, :user, :order_cycle, order_items: [ :item, :item_variant ]).find(params[:id])
-      end
 
-      def load_organizations
-        @organizations = Organization.active.order(:name)
-      end
+    def set_order
+      @order = Order.includes(:organization, :user, :order_cycle,
+                              order_items: %i[item item_variant]).find(params[:id])
+    end
 
-      def build_blank_rows(count = 1)
-        count.times do |index|
-          @order.order_items.build(sort_order: @order.order_items.size + index)
-        end
-      end
+    def load_organizations
+      @organizations = Organization.active.order(:name)
+    end
 
-      def order_params
-        params.require(:order).permit(
-          :orderer_name,
-          :pickup_name,
-          :organization_id,
-          :status,
-          order_items_attributes: [
-            :id, :item_id, :item_variant_id, :item_code, :item_name, :variant_name, :quantity, :unit, :notes, :sort_order, :_destroy
-          ]
-        )
+    def build_blank_rows(count = 1)
+      count.times do |index|
+        @order.order_items.build(sort_order: @order.order_items.size + index)
       end
+    end
+
+    def order_params
+      params.require(:order).permit(
+        :orderer_name,
+        :pickup_name,
+        :organization_id,
+        :status,
+        order_items_attributes: %i[
+          id item_id item_variant_id item_code item_name variant_name quantity unit notes sort_order _destroy
+        ]
+      )
+    end
   end
 end

@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 module Admin
   class ItemsController < BaseController
-    before_action :set_item, only: [ :edit, :update ]
+    before_action :set_item, only: %i[edit update]
 
     def index
       @items = Item.includes(:item_variants).order(:code)
@@ -19,8 +21,7 @@ module Admin
       end
     end
 
-    def edit
-    end
+    def edit; end
 
     def update
       if @item.update(item_params)
@@ -32,27 +33,29 @@ module Admin
     end
 
     private
-      def set_item
-        @item = Item.includes(:item_variants).find(params[:id])
+
+    def set_item
+      @item = Item.includes(:item_variants).find(params[:id])
+    end
+
+    def item_params
+      params.require(:item).permit(:code, :name, :value, :refund, :unit, :center_category, :special_handling_type,
+                                   :active)
+    end
+
+    def sync_variants
+      return unless params[:variant_names]
+
+      submitted_names = params[:variant_names].split("\n").map(&:strip).reject(&:blank?)
+
+      @item.item_variants.where.not(name: submitted_names).destroy_all
+
+      submitted_names.each_with_index do |name, index|
+        variant = @item.item_variants.find_or_initialize_by(name:)
+        variant.display_order = index
+        variant.active = true
+        variant.save!
       end
-
-      def item_params
-        params.require(:item).permit(:code, :name, :value, :refund, :unit, :center_category, :special_handling_type, :active)
-      end
-
-      def sync_variants
-        return unless params[:variant_names]
-
-        submitted_names = params[:variant_names].split("\n").map(&:strip).reject(&:blank?)
-
-        @item.item_variants.where.not(name: submitted_names).destroy_all
-
-        submitted_names.each_with_index do |name, index|
-          variant = @item.item_variants.find_or_initialize_by(name:)
-          variant.display_order = index
-          variant.active = true
-          variant.save!
-        end
-      end
+    end
   end
 end

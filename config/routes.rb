@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 Rails.application.routes.draw do
-  resource :session, only: [ :new, :create, :destroy ]
-  resources :passwords, only: [ :new, :create, :edit, :update ], param: :token
-  resource :current_order, only: [ :show, :create, :update ], controller: :current_orders
-  resources :orders, only: [ :index, :show ]
+  resource :session, only: %i[new create destroy]
+  resources :passwords, only: %i[new create edit update], param: :token
+  resource :current_order, only: %i[show create update], controller: :current_orders
+  resources :orders, only: %i[index show]
   resources :items, only: [] do
     collection do
       get :search
@@ -12,11 +14,11 @@ Rails.application.routes.draw do
   namespace :admin do
     root "order_cycles#index"
 
-    resources :organizations, only: [ :index, :create, :edit, :update ]
-    resources :users, only: [ :index, :create, :edit, :update ]
-    resources :items, only: [ :index, :create, :edit, :update ]
-    resources :order_cycles, only: [ :index, :show, :create, :edit, :update ]
-    resources :orders, only: [ :index, :show, :edit, :update ]
+    resources :organizations, only: %i[index create edit update]
+    resources :users, only: %i[index create edit update]
+    resources :items, only: %i[index create edit update]
+    resources :order_cycles, only: %i[index show create edit update]
+    resources :orders, only: %i[index show edit update]
   end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DailyOrderCheckJob < ApplicationJob
   queue_as :default
 
@@ -18,11 +20,12 @@ class DailyOrderCheckJob < ApplicationJob
   end
 
   private
-    def reminder_target_cycles
-      OrderCycle.where(order_date: Date.current + 1.day).where.not(status: :sent)
-    end
 
-    def summary_target_cycles
-      OrderCycle.where(order_date: Date.current).where.not(status: :sent)
-    end
+  def reminder_target_cycles
+    OrderCycle.where(order_date: Date.current + 1.day).where.not(status: :sent)
+  end
+
+  def summary_target_cycles
+    OrderCycle.where(order_date: Date.current).where.not(status: :sent)
+  end
 end

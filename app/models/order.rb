@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Order < ApplicationRecord
   belongs_to :user
   belongs_to :organization
@@ -5,10 +7,12 @@ class Order < ApplicationRecord
   has_many :order_items, -> { order(:sort_order, :id) }, dependent: :destroy, inverse_of: :order
 
   accepts_nested_attributes_for :order_items,
-    allow_destroy: true,
-    reject_if: ->(attributes) {
-      %w[item_code item_name variant_name quantity unit notes].all? { |key| attributes[key].blank? }
-    }
+                                allow_destroy: true,
+                                reject_if: lambda { |attributes|
+                                  %w[item_code item_name variant_name quantity unit notes].all? { |key|
+                                    attributes[key].blank?
+                                  }
+                                }
 
   enum :status, {
     draft: "draft",
@@ -31,14 +35,15 @@ class Order < ApplicationRecord
   end
 
   private
-    def sync_organization
-      self.organization ||= user&.organization
-    end
 
-    def submitted_orders_must_have_items
-      return unless submitted?
-      return if order_items.reject(&:marked_for_destruction?).any?
+  def sync_organization
+    self.organization ||= user&.organization
+  end
 
-      errors.add(:base, "提出時は明細を1行以上入力してください")
-    end
+  def submitted_orders_must_have_items
+    return unless submitted?
+    return if order_items.reject(&:marked_for_destruction?).any?
+
+    errors.add(:base, "提出時は明細を1行以上入力してください")
+  end
 end

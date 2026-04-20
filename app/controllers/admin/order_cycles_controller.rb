@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 module Admin
   class OrderCyclesController < BaseController
-    before_action :set_order_cycle, only: [ :show, :edit, :update ]
+    before_action :set_order_cycle, only: %i[show edit update]
 
     def index
       @order_cycles = OrderCycle.recent_first
@@ -22,8 +24,7 @@ module Admin
       end
     end
 
-    def edit
-    end
+    def edit; end
 
     def update
       if @order_cycle.update(order_cycle_params)
@@ -34,12 +35,14 @@ module Admin
     end
 
     private
-      def set_order_cycle
-        @order_cycle = OrderCycle.find(params[:id])
-      end
 
-      def order_cycle_params
-        params.require(:order_cycle).permit(:year, :month, :cycle_number, :deadline_at, :order_date, :arrival_date, :status)
-      end
+    def set_order_cycle
+      @order_cycle = OrderCycle.find(params[:id])
+    end
+
+    def order_cycle_params
+      params.require(:order_cycle).permit(:year, :month, :cycle_number, :deadline_at, :order_date, :arrival_date,
+                                          :status)
+    end
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ItemVariant < ApplicationRecord
   belongs_to :item
   has_many :order_items, dependent: :restrict_with_exception

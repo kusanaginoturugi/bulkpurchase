@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateItemVariants < ActiveRecord::Migration[8.0]
   def change
     create_table :item_variants do |t|
@@ -9,6 +11,6 @@ class CreateItemVariants < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :item_variants, [ :item_id, :name ], unique: true
+    add_index :item_variants, %i[item_id name], unique: true
   end
 end

@@ -1,15 +1,17 @@
+# frozen_string_literal: true
+
 class ItemsController < ApplicationController
   def search
     query = params[:q].to_s.strip
 
     items = if query.present?
-      Item.active
-        .where("code LIKE :q OR name LIKE :q", q: "#{query}%")
-        .includes(:item_variants)
-        .order(:code)
-        .limit(20)
+              Item.active
+                  .where("code LIKE :q OR name LIKE :q", q: "#{query}%")
+                  .includes(:item_variants)
+                  .order(:code)
+                  .limit(20)
     else
-      Item.none
+              Item.none
     end
 
     render json: items.map { |item|

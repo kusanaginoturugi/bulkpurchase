@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OrderCycle < ApplicationRecord
   has_many :orders, dependent: :restrict_with_exception
 
@@ -28,10 +30,11 @@ class OrderCycle < ApplicationRecord
   end
 
   private
-    def deadline_must_not_be_after_order_date
-      return if deadline_at.blank? || order_date.blank?
-      return if deadline_at.to_date <= order_date
 
-      errors.add(:deadline_at, "must be on or before the order date")
-    end
+  def deadline_must_not_be_after_order_date
+    return if deadline_at.blank? || order_date.blank?
+    return if deadline_at.to_date <= order_date
+
+    errors.add(:deadline_at, "must be on or before the order date")
+  end
 end

@@ -3,6 +3,7 @@ class CurrentOrdersController < ApplicationController
   before_action :set_order
 
   def show
+    @organizations = Organization.active.order(:name)
     build_blank_rows if @order.order_items.empty?
   end
 
@@ -62,6 +63,7 @@ class CurrentOrdersController < ApplicationController
         message = params[:commit_action] == "submit" ? "注文を提出しました。" : "注文を保存しました。"
         redirect_to current_order_path, notice: message
       else
+        @organizations = Organization.active.order(:name)
         build_blank_rows(1) if @order.order_items.empty?
         render :show, status: :unprocessable_entity
       end

@@ -40,6 +40,7 @@
             <%= link_to "現在の注文", current_order_path, class: "rounded-md px-3 py-2 text-stone-700 hover:bg-stone-100" %>
             <%= link_to "履歴", orders_path, class: "rounded-md px-3 py-2 text-stone-700 hover:bg-stone-100" %>
             <% if current_user.admin? %>
+              <%= link_to "ユーザー情報", edit_admin_user_path(current_user), class: "rounded-md px-3 py-2 text-stone-700 hover:bg-stone-100" %>
               <%= link_to "管理", admin_root_path, class: "rounded-md bg-stone-900 px-3 py-2 text-white hover:bg-stone-700" %>
             <% end %>
             <%= button_to "ログアウト", session_path, method: :delete, class: "rounded-md border border-stone-300 px-3 py-2 text-stone-700 hover:bg-stone-100" %>

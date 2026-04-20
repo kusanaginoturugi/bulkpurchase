@@ -16,7 +16,7 @@ Rails.application.routes.draw do
     resources :users, only: [ :index, :create, :edit, :update ]
     resources :items, only: [ :index, :create, :edit, :update ]
     resources :order_cycles, only: [ :index, :show, :create, :edit, :update ]
-    resources :orders, only: [ :index, :show ]
+    resources :orders, only: [ :index, :show, :edit, :update ]
   end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

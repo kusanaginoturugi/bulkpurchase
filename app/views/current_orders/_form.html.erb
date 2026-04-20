@@ -1,7 +1,11 @@
-<% readonly = !order.editable_by_user? %>
+<% readonly = local_assigns.fetch(:readonly, !order.editable_by_user?) %>
 <% form_method = order.persisted? ? :patch : :post %>
+<% organization_selectable = local_assigns.fetch(:organization_selectable, false) %>
+<% organizations = local_assigns.fetch(:organizations, []) %>
+<% form_url = local_assigns.fetch(:form_url, current_order_path) %>
+<% back_path = local_assigns[:back_path] %>
 
-<%= form_with model: order, url: current_order_path, method: form_method, class: "space-y-8", data: { controller: "order-items" } do |form| %>
+<%= form_with model: order, url: form_url, method: form_method, class: "space-y-8", data: { controller: "order-items" } do |form| %>
   <div class="grid gap-6 md:grid-cols-3">
     <div>
       <%= form.label :orderer_name, "注文者名", class: "text-sm font-medium text-stone-700" %>
@@ -13,7 +17,11 @@
     </div>
     <div>
       <label class="text-sm font-medium text-stone-700">伝道会</label>
-      <div class="mt-2 rounded-xl border border-stone-200 bg-stone-100 px-4 py-3 text-stone-700"><%= current_user.organization.name %></div>
+      <% if organization_selectable %>
+        <%= form.collection_select :organization_id, organizations, :id, :name, {}, disabled: readonly, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3 focus:border-amber-500 focus:bg-white focus:outline-none disabled:cursor-not-allowed disabled:bg-stone-100" %>
+      <% else %>
+        <div class="mt-2 rounded-xl border border-stone-200 bg-stone-100 px-4 py-3 text-stone-700"><%= order.organization&.name || current_user.organization.name %></div>
+      <% end %>
     </div>
   </div>
 
@@ -53,7 +61,10 @@
       <%= button_tag "提出する", name: "commit_action", value: "submit", class: "inline-flex rounded-xl bg-stone-900 px-5 py-3 text-sm font-medium text-white hover:bg-stone-700" %>
     <% end %>
     <% if order.persisted? %>
-      <%= link_to "注文詳細を見る", order_path(order), class: "inline-flex rounded-xl border border-stone-300 px-5 py-3 text-sm font-medium text-stone-700 hover:bg-stone-100" %>
+      <%= link_to "注文詳細を見る", local_assigns.fetch(:detail_path, order_path(order)), class: "inline-flex rounded-xl border border-stone-300 px-5 py-3 text-sm font-medium text-stone-700 hover:bg-stone-100" %>
+    <% end %>
+    <% if back_path.present? %>
+      <%= link_to "一覧へ戻る", back_path, class: "inline-flex rounded-xl border border-stone-300 px-5 py-3 text-sm font-medium text-stone-700 hover:bg-stone-100" %>
     <% end %>
   </div>
 <% end %>

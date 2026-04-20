@@ -37,6 +37,6 @@
       </div>
     <% end %>
 
-    <%= render "form", order: @order %>
+    <%= render "form", order: @order, form_url: current_order_path, organization_selectable: false, organizations: @organizations, back_path: nil %>
   </section>
 <% end %>

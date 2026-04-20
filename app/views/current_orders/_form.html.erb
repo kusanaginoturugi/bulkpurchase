@@ -39,7 +39,7 @@
 
       <div data-order-items-target="container" class="divide-y divide-stone-200">
         <%= form.fields_for :order_items do |item_fields| %>
-          <%= render "order_item_fields", f: item_fields, readonly: readonly %>
+          <%= render "current_orders/order_item_fields", f: item_fields, readonly: readonly %>
         <% end %>
       </div>
     </div>
@@ -53,7 +53,7 @@
 
   <template data-order-items-target="template">
     <%= form.fields_for :order_items, OrderItem.new(sort_order: order.order_items.size), child_index: "NEW_RECORD" do |item_fields| %>
-      <%= render "order_item_fields", f: item_fields, readonly: readonly %>
+      <%= render "current_orders/order_item_fields", f: item_fields, readonly: readonly %>
     <% end %>
   </template>
 

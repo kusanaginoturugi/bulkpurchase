@@ -31,7 +31,7 @@ class CurrentOrdersController < ApplicationController
       end
     end
 
-    def build_blank_rows(count = 5)
+    def build_blank_rows(count = 1)
       count.times do |index|
         @order.order_items.build(sort_order: index)
       end

@@ -25,21 +25,23 @@
     </div>
   </div>
 
-  <div class="overflow-hidden rounded-3xl border border-stone-200">
-    <div class="grid grid-cols-[1.2fr,0.9fr,1.1fr,0.7fr,0.6fr,1fr,auto] gap-3 border-b border-stone-200 bg-stone-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">
-      <div>検索</div>
-      <div>道具コード</div>
-      <div>道具名</div>
-      <div>種別</div>
-      <div>数量</div>
-      <div>単位 / 備考</div>
-      <div></div>
-    </div>
+  <div class="overflow-x-auto rounded-3xl border border-stone-200">
+    <div class="min-w-[980px]">
+      <div class="grid gap-3 border-b border-stone-200 bg-stone-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-stone-500" style="grid-template-columns: 1.2fr 0.9fr 1.1fr 0.7fr 0.6fr 1fr auto;">
+        <div>検索</div>
+        <div>道具コード</div>
+        <div>道具名</div>
+        <div>種別</div>
+        <div>数量</div>
+        <div>単位 / 備考</div>
+        <div></div>
+      </div>
 
-    <div data-order-items-target="container" class="divide-y divide-stone-200">
-      <%= form.fields_for :order_items do |item_fields| %>
-        <%= render "order_item_fields", f: item_fields, readonly: readonly %>
-      <% end %>
+      <div data-order-items-target="container" class="divide-y divide-stone-200">
+        <%= form.fields_for :order_items do |item_fields| %>
+          <%= render "order_item_fields", f: item_fields, readonly: readonly %>
+        <% end %>
+      </div>
     </div>
   </div>
 

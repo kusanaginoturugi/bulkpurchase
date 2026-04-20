@@ -38,7 +38,7 @@
     </div>
   <% end %>
   <div class="flex gap-3">
-    <%= form.submit class: "rounded-xl bg-stone-900 px-5 py-3 text-sm font-medium text-white" %>
+    <%= form.submit(item.persisted? ? "道具を更新" : "道具を登録", class: "rounded-xl bg-stone-900 px-5 py-3 text-sm font-medium text-white") %>
     <%= link_to "一覧へ戻る", admin_items_path, class: "rounded-xl border border-stone-300 px-5 py-3 text-sm font-medium text-stone-700" %>
   </div>
 <% end %>

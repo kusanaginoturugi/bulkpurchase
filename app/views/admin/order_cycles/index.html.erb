@@ -18,7 +18,7 @@
             <td class="py-3"><%= order_cycle.label %></td>
             <td class="py-3"><%= order_cycle.cycle_number %></td>
             <td class="py-3"><%= l(order_cycle.deadline_at, format: :long) %></td>
-            <td class="py-3"><%= order_cycle.status %></td>
+            <td class="py-3"><%= order_cycle.status_label %></td>
             <td class="py-3 text-right">
               <%= link_to "詳細", admin_order_cycle_path(order_cycle), class: "mr-3 font-medium text-stone-900" %>
               <%= link_to "編集", edit_admin_order_cycle_path(order_cycle), class: "font-medium text-stone-900" %>

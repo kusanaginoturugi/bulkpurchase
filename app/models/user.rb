@@ -10,6 +10,14 @@ class User < ApplicationRecord
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
+  def role_label
+    I18n.t("enums.user.role.#{role}", default: role)
+  end
+
+  def self.role_options
+    roles.keys.map { |value| [ I18n.t("enums.user.role.#{value}", default: value), value ] }
+  end
+
   validates :name, :email_address, :role, presence: true
 
   scope :active, -> { where(active: true) }

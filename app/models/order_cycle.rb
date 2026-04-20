@@ -21,12 +21,20 @@ class OrderCycle < ApplicationRecord
     format("%<year>d年%<month>02d月", year:, month:)
   end
 
+  def status_label
+    I18n.t("enums.order_cycle.status.#{status}", default: status)
+  end
+
   def editable_by_users?
     !sent?
   end
 
   def self.current_for_user
     editable_by_users.first
+  end
+
+  def self.status_options
+    statuses.keys.map { |value| [ I18n.t("enums.order_cycle.status.#{value}", default: value), value ] }
   end
 
   private

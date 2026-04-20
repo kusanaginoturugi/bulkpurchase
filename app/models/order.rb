@@ -29,6 +29,10 @@ class Order < ApplicationRecord
     order_cycle.editable_by_users?
   end
 
+  def status_label
+    I18n.t("enums.order.status.#{status}", default: status)
+  end
+
   def mark_submitted!
     self.status = "submitted"
     self.submitted_at = Time.current

@@ -7,3 +7,17 @@ ja:
     formats:
       default: "%Y-%m-%d %H:%M"
       long: "%Y年%-m月%-d日 %H:%M"
+  enums:
+    order_cycle:
+      status:
+        open: "受付中"
+        closed: "締切"
+        sent: "送信済み"
+    order:
+      status:
+        draft: "下書き"
+        submitted: "提出済み"
+    user:
+      role:
+        admin: "管理者"
+        user: "一般ユーザー"

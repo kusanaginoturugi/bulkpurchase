@@ -17,7 +17,7 @@
           <td class="py-3"><%= order.order_cycle.label %></td>
           <td class="py-3"><%= order.organization.name %></td>
           <td class="py-3"><%= order.orderer_name %></td>
-          <td class="py-3"><%= order.status %></td>
+          <td class="py-3"><%= order.status_label %></td>
           <td class="py-3 text-right">
             <%= link_to "詳細", admin_order_path(order), class: "mr-3 font-medium text-stone-900" %>
             <%= link_to "編集", edit_admin_order_path(order), class: "font-medium text-stone-900" %>

@@ -22,7 +22,7 @@
             <td class="py-3"><%= user.name %></td>
             <td class="py-3"><%= user.email_address %></td>
             <td class="py-3"><%= user.organization.name %></td>
-            <td class="py-3"><%= user.role %></td>
+            <td class="py-3"><%= user.role_label %></td>
             <td class="py-3 text-right"><%= link_to "編集", edit_admin_user_path(user), class: "font-medium text-stone-900" %></td>
           </tr>
         <% end %>

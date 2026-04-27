@@ -16,6 +16,7 @@ export BUNDLE_PATH="$APP_ROOT/vendor/bundle"
 git config core.fileMode false
 
 git fetch origin
+git checkout -- app/assets/builds/tailwind.css
 git pull --ff-only origin main
 
 bundle config set deployment true

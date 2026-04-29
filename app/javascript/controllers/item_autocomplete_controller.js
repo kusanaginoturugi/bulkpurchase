@@ -33,9 +33,10 @@ export default class extends Controller {
 
     this.timeout = setTimeout(() => {
       fetch(`/items/search?q=${encodeURIComponent(query)}`, {
+        credentials: "same-origin",
         headers: { Accept: "application/json" }
       })
-        .then((response) => response.json())
+        .then((response) => (response.ok ? response.json() : []))
         .then((items) => this.renderMenu(items))
         .catch(() => this.hideMenu())
     }, 200)
@@ -55,6 +56,7 @@ export default class extends Controller {
       return `<button type="button" data-payload="${payload}" class="block w-full whitespace-nowrap border-b border-stone-100 px-3 py-2 text-left text-sm text-stone-700 hover:bg-stone-50" data-action="click->item-autocomplete#select">${item.code} ${item.name}</button>`
     }).join("")
 
+    this.positionMenu()
     this.menuTarget.classList.remove("hidden")
   }
 
@@ -98,5 +100,15 @@ export default class extends Controller {
   hideMenu() {
     this.menuTarget.innerHTML = ""
     this.menuTarget.classList.add("hidden")
+    this.menuTarget.removeAttribute("style")
+  }
+
+  positionMenu() {
+    const rect = this.queryTarget.getBoundingClientRect()
+
+    this.menuTarget.style.position = "fixed"
+    this.menuTarget.style.left = `${rect.left}px`
+    this.menuTarget.style.top = `${rect.bottom + 4}px`
+    this.menuTarget.style.width = `${rect.width}px`
   }
 }

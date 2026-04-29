@@ -1,7 +1,7 @@
 <% order_item = f.object %>
 <% query_value = [order_item.item_code, order_item.item_name].compact.reject(&:blank?).join(" ") %>
 
-<div class="grid gap-3 px-4 py-4" style="grid-template-columns: 1.25fr 0.8fr 1.1fr 1fr 0.5fr 0.45fr auto;" data-controller="item-autocomplete">
+<div class="grid gap-3 px-4 py-4" style="grid-template-columns: 1.25fr 0.8fr 1.1fr 1fr 0.45fr 0.45fr 5.5rem;" data-controller="item-autocomplete">
   <div class="relative">
     <%= text_field_tag nil, query_value, placeholder: "コードまたは名称", disabled: readonly, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { action: "input->item-autocomplete#syncQuery input->item-autocomplete#search", item_autocomplete_target: "query", original_value: query_value } %>
     <div data-item-autocomplete-target="menu" class="absolute z-10 mt-1 hidden min-w-full overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-lg"></div>
@@ -22,7 +22,7 @@
   </div>
 
   <div>
-    <%= f.number_field :quantity, min: 1, readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100" %>
+    <%= f.text_field :quantity, inputmode: "numeric", pattern: "[0-9]*", readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100" %>
   </div>
 
   <div>

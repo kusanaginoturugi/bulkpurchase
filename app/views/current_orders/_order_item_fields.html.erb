@@ -4,38 +4,38 @@
 
 <div class="grid gap-3 px-4 py-4" style="grid-template-columns: 1.2fr 0.9fr 1.1fr 0.7fr 0.6fr 1fr auto;" data-controller="item-autocomplete">
   <div class="relative">
-    <%= text_field_tag nil, query_value, placeholder: "コードまたは名称", disabled: readonly, class: "block w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { action: "input->item-autocomplete#search", item_autocomplete_target: "query" } %>
+    <%= text_field_tag nil, query_value, placeholder: "コードまたは名称", disabled: readonly, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { action: "input->item-autocomplete#search", item_autocomplete_target: "query" } %>
     <div data-item-autocomplete-target="menu" class="absolute z-10 mt-1 hidden w-full rounded-xl border border-stone-200 bg-white shadow-lg"></div>
   </div>
 
   <div>
     <%= f.hidden_field :item_id, data: { item_autocomplete_target: "itemId" } %>
-    <%= f.text_field :item_code, readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { item_autocomplete_target: "itemCode" } %>
+    <%= f.text_field :item_code, readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { item_autocomplete_target: "itemCode" } %>
   </div>
 
   <div>
-    <%= f.text_field :item_name, readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { item_autocomplete_target: "itemName" } %>
+    <%= f.text_field :item_name, readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { item_autocomplete_target: "itemName" } %>
   </div>
 
   <div>
     <%= f.hidden_field :item_variant_id %>
-    <%= f.text_field :variant_name, placeholder: "無地 / 有気復命", readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none disabled:bg-stone-100 #{'hidden' unless show_variant}", data: { item_autocomplete_target: "variantName" } %>
+    <%= f.text_field :variant_name, placeholder: "無地 / 有気復命", readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100 #{'hidden' unless show_variant}", data: { item_autocomplete_target: "variantName" } %>
   </div>
 
   <div>
-    <%= f.number_field :quantity, min: 1, readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none disabled:bg-stone-100" %>
+    <%= f.number_field :quantity, min: 1, readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100" %>
   </div>
 
   <div class="space-y-3">
-    <%= f.text_field :unit, readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { item_autocomplete_target: "unit" } %>
-    <%= f.text_field :notes, readonly:, placeholder: "備考", class: "block w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none disabled:bg-stone-100" %>
+    <%= f.text_field :unit, readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { item_autocomplete_target: "unit" } %>
+    <%= f.text_field :notes, readonly:, placeholder: "備考", class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100" %>
     <%= f.hidden_field :sort_order %>
     <%= f.hidden_field :_destroy %>
   </div>
 
   <div class="flex items-start justify-end">
     <% unless readonly %>
-      <button type="button" data-action="order-items#remove" class="rounded-xl border border-rose-200 px-3 py-2 text-sm text-rose-700 hover:bg-rose-50">削除</button>
+      <button type="button" data-action="order-items#remove" class="rounded-xl border border-rose-200 px-4 py-3 text-lg text-rose-700 hover:bg-rose-50">削除</button>
     <% end %>
   </div>
 </div>

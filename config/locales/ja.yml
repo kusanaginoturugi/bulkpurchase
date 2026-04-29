@@ -34,12 +34,17 @@ ja:
         organization_id: "伝道会"
         role: "権限"
         active: "有効"
+      organization:
+        code: "伝道会番号"
+        name: "名称"
+        active: "有効"
     errors:
       messages:
         blank: "を入力してください"
         required: "を選択してください"
         taken: "はすでに使われています"
         confirmation: "が一致しません"
+        invalid: "は正しく入力してください"
         too_short: "は%{count}文字以上で入力してください"
         too_long: "は%{count}文字以内で入力してください"
         record_invalid: "入力内容を確認してください: %{errors}"

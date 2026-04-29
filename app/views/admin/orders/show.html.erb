@@ -1,4 +1,4 @@
-<%= render "admin/shared/header", title: "注文詳細", description: "#{@order.order_cycle.label} / #{@order.organization.name}" %>
+<%= render "admin/shared/header", title: "注文詳細", description: "#{@order.order_cycle.label} / #{@order.organization.display_name}" %>
 <div class="mb-6">
   <%= link_to "この注文を編集", edit_admin_order_path(@order), class: "inline-flex rounded-xl bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700" %>
 </div>

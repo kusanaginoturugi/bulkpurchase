@@ -2,10 +2,10 @@
 
 module Admin
   class OrganizationsController < BaseController
-    before_action :set_organization, only: %i[edit update]
+    before_action :set_organization, only: %i[edit update destroy]
 
     def index
-      @organizations = Organization.order(:name)
+      @organizations = Organization.order(:code, :name)
       @organization = Organization.new(active: true)
     end
 
@@ -15,7 +15,7 @@ module Admin
       if @organization.save
         redirect_to admin_organizations_path, notice: "伝道会を登録しました。"
       else
-        @organizations = Organization.order(:name)
+        @organizations = Organization.order(:code, :name)
         render :index, status: :unprocessable_entity
       end
     end
@@ -30,6 +30,13 @@ module Admin
       end
     end
 
+    def destroy
+      @organization.destroy!
+      redirect_to admin_organizations_path, notice: "伝道会を削除しました。"
+    rescue ActiveRecord::DeleteRestrictionError
+      redirect_to admin_organizations_path, alert: "ユーザーまたは注文がある伝道会は削除できません。無効化してください。"
+    end
+
     private
 
     def set_organization
@@ -37,7 +44,7 @@ module Admin
     end
 
     def organization_params
-      params.require(:organization).permit(:name, :active)
+      params.require(:organization).permit(:code, :name, :active)
     end
   end
 end

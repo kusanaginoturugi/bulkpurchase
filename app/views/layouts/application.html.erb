@@ -22,7 +22,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="min-h-screen bg-stone-100 text-stone-900">
+  <body class="min-h-screen bg-stone-100 text-lg text-stone-900">
     <header class="border-b border-stone-200 bg-white/95 backdrop-blur">
       <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <div>
@@ -35,7 +35,7 @@
 
           <% if current_user %>
             <span class="rounded-full bg-stone-100 px-3 py-1 text-stone-700">
-              <%= current_user.organization.name %> / <%= current_user.name %>
+              <%= current_user.organization.display_name %> / <%= current_user.name %>
             </span>
             <%= link_to "現在の注文", current_order_path, class: "rounded-md px-3 py-2 text-stone-700 hover:bg-stone-100" %>
             <%= link_to "履歴", current_user.admin? ? admin_orders_path : orders_path, class: "rounded-md px-3 py-2 text-stone-700 hover:bg-stone-100" %>

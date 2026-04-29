@@ -10,10 +10,23 @@ def infer_unit(name)
   '個'
 end
 
-organization_names = %w[富士山 山梨 大仏殿]
-organizations = organization_names.index_with do |name|
-  Organization.find_or_create_by!(name:) do |organization|
+organization_codes = {
+  '埼玉' => '31101',
+  '千葉' => '31201',
+  '大江戸' => '31303',
+  'お台場' => '31305',
+  '山梨' => '31901',
+  '富士山' => '32204',
+  '駿天' => '32205',
+  '聖明王院' => '99300'
+}
+
+organizations = organization_codes.each_with_object({}) do |(name, code), result|
+  Organization.find_or_initialize_by(name:).tap do |organization|
+    organization.code = code
     organization.active = true
+    organization.save!
+    result[name] = organization
   end
 end
 

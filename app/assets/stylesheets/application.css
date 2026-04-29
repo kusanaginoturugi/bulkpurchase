@@ -8,3 +8,22 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+html {
+  font-size: 18px;
+}
+
+.text-xs {
+  font-size: 0.875rem;
+}
+
+.text-sm {
+  font-size: 1rem;
+}
+
+input,
+select,
+textarea,
+button {
+  font-size: 1rem;
+}

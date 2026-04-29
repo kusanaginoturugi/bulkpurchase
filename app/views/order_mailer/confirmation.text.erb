@@ -2,7 +2,7 @@
 
 注文を受け付けました。
 対象月: <%= @order.order_cycle.label %>
-伝道会: <%= @order.organization.name %>
+伝道会: <%= @order.organization.display_name %>
 注文者名: <%= @order.orderer_name %>
 
 <% @order.order_items.each do |item| %>

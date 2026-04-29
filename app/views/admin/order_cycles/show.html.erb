@@ -34,7 +34,7 @@
       <tbody class="divide-y divide-stone-200">
         <% @orders.each do |order| %>
           <tr>
-            <td class="px-4 py-3"><%= order.organization.name %></td>
+            <td class="px-4 py-3"><%= order.organization.display_name %></td>
             <td class="px-4 py-3"><%= order.orderer_name %></td>
             <td class="px-4 py-3"><%= order.status_label %></td>
             <td class="px-4 py-3"><%= order.order_items.size %></td>

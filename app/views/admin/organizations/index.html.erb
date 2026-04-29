@@ -5,6 +5,7 @@
     <table class="min-w-full divide-y divide-stone-200 text-sm">
       <thead class="text-left text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">
         <tr>
+          <th class="py-3">伝道会番号</th>
           <th class="py-3">名称</th>
           <th class="py-3">有効</th>
           <th class="py-3"></th>
@@ -13,9 +14,15 @@
       <tbody class="divide-y divide-stone-200">
         <% @organizations.each do |organization| %>
           <tr>
+            <td class="py-3"><%= organization.code %></td>
             <td class="py-3"><%= organization.name %></td>
             <td class="py-3"><%= organization.active? ? "有効" : "無効" %></td>
-            <td class="py-3 text-right"><%= link_to "編集", edit_admin_organization_path(organization), class: "font-medium text-stone-900" %></td>
+            <td class="py-3">
+              <div class="flex justify-end gap-3">
+                <%= link_to "編集", edit_admin_organization_path(organization), class: "font-medium text-stone-900" %>
+                <%= button_to "削除", admin_organization_path(organization), method: :delete, class: "font-medium text-rose-700", form: { data: { turbo_confirm: "#{organization.display_name}を削除しますか？" } } %>
+              </div>
+            </td>
           </tr>
         <% end %>
       </tbody>

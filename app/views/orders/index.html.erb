@@ -27,7 +27,7 @@
         <% @orders.each do |order| %>
           <tr>
             <td class="px-4 py-3"><%= order.order_cycle.label %></td>
-            <td class="px-4 py-3"><%= order.organization.name %></td>
+            <td class="px-4 py-3"><%= order.organization.display_name %></td>
             <% if @admin_view %>
               <td class="px-4 py-3"><%= order.user.name %></td>
             <% end %>

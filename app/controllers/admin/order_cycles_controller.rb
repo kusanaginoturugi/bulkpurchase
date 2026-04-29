@@ -6,7 +6,6 @@ module Admin
 
     def index
       @order_cycles = OrderCycle.recent_first
-      @order_cycle = OrderCycle.new(status: :open, year: Date.current.year, month: Date.current.month)
     end
 
     def show

@@ -1,22 +1,22 @@
-<%= form_with model: [ :admin, order_cycle ], class: "mt-6 space-y-4" do |form| %>
+<%= form_with model: [ :admin, order_cycle ], class: "mt-6 space-y-4", data: { controller: "order-cycle-form" } do |form| %>
   <div class="grid gap-4 md:grid-cols-2">
     <div>
       <%= form.label :year, "年", class: "text-sm font-medium text-stone-700" %>
-      <%= form.number_field :year, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
+      <%= form.number_field :year, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3", data: { order_cycle_form_target: "year", action: "input->order-cycle-form#autofill change->order-cycle-form#autofill" } %>
     </div>
     <div>
       <%= form.label :month, "月", class: "text-sm font-medium text-stone-700" %>
-      <%= form.number_field :month, min: 1, max: 12, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
+      <%= form.number_field :month, min: 1, max: 12, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3", data: { order_cycle_form_target: "month", action: "input->order-cycle-form#autofill change->order-cycle-form#autofill" } %>
     </div>
   </div>
   <div class="grid gap-4 md:grid-cols-2">
     <div>
       <%= form.label :deadline_at, "締切日時", class: "text-sm font-medium text-stone-700" %>
-      <%= form.datetime_local_field :deadline_at, value: order_cycle.deadline_at&.strftime("%Y-%m-%dT%H:%M"), class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
+      <%= form.datetime_local_field :deadline_at, value: order_cycle.deadline_at&.strftime("%Y-%m-%dT%H:%M"), class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3", data: { order_cycle_form_target: "deadlineAt" } %>
     </div>
     <div>
       <%= form.label :arrival_date, "必着日", class: "text-sm font-medium text-stone-700" %>
-      <%= form.date_field :arrival_date, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
+      <%= form.date_field :arrival_date, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3", data: { order_cycle_form_target: "arrivalDate" } %>
     </div>
   </div>
   <div>

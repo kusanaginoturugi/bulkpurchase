@@ -14,6 +14,8 @@ class OrderCycle < ApplicationRecord
   validates :year, uniqueness: { scope: :month }
   validate :deadline_must_not_be_after_order_date
 
+  before_validation :derive_dates_and_cycle_number
+
   scope :recent_first, -> { order(year: :desc, month: :desc) }
   scope :editable_by_users, -> { where.not(status: "sent").recent_first }
 
@@ -38,6 +40,11 @@ class OrderCycle < ApplicationRecord
   end
 
   private
+
+  def derive_dates_and_cycle_number
+    self.cycle_number = month if cycle_number.blank? && month.present?
+    self.order_date = deadline_at.to_date.next_day if deadline_at.present?
+  end
 
   def deadline_must_not_be_after_order_date
     return if deadline_at.blank? || order_date.blank?

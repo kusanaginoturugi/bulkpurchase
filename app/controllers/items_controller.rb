@@ -6,6 +6,7 @@ class ItemsController < ApplicationController
 
     items = if query.present?
               Item.active
+                  .managed
                   .where("code LIKE :q OR name LIKE :q", q: "#{query}%")
                   .includes(:item_variants)
                   .order(:code)

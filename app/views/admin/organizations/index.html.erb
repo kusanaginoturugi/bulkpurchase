@@ -5,8 +5,8 @@
     <table class="min-w-full divide-y divide-stone-200 text-sm">
       <thead class="text-left text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">
         <tr>
-          <th class="py-3">伝道会番号</th>
-          <th class="py-3">名称</th>
+          <th class="w-28 py-3 pr-2">伝道会番号</th>
+          <th class="py-3 pl-0">伝道会名</th>
           <th class="py-3">有効</th>
           <th class="py-3"></th>
         </tr>
@@ -14,8 +14,8 @@
       <tbody class="divide-y divide-stone-200">
         <% @organizations.each do |organization| %>
           <tr>
-            <td class="py-3"><%= organization.code %></td>
-            <td class="py-3"><%= organization.name %></td>
+            <td class="w-28 py-3 pr-2"><%= organization.code %></td>
+            <td class="py-3 pl-0"><%= organization.name %></td>
             <td class="py-3"><%= organization.active? ? "有効" : "無効" %></td>
             <td class="py-3">
               <div class="flex justify-end gap-3">

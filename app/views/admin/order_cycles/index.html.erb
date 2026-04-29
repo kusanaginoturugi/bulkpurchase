@@ -1,4 +1,4 @@
-<%= render "admin/shared/header", title: "注文サイクル管理", description: "月例番号、締切、注文日、必着日を設定します。" %>
+<%= render "admin/shared/header", title: "注文サイクル管理", description: "締切と必着日を設定します。注文日は締切の翌日に自動設定されます。" %>
 
 <div class="grid gap-6 lg:grid-cols-[1.15fr,0.85fr]">
   <section class="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm">
@@ -6,7 +6,6 @@
       <thead class="text-left text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">
         <tr>
           <th class="py-3">対象月</th>
-          <th class="py-3">月例</th>
           <th class="py-3">締切</th>
           <th class="py-3">状態</th>
           <th class="py-3"></th>
@@ -16,12 +15,12 @@
         <% @order_cycles.each do |order_cycle| %>
           <tr>
             <td class="py-3"><%= order_cycle.label %></td>
-            <td class="py-3"><%= order_cycle.cycle_number %></td>
             <td class="py-3"><%= l(order_cycle.deadline_at, format: :long) %></td>
             <td class="py-3"><%= order_cycle.status_label %></td>
             <td class="py-3 text-right">
               <%= link_to "詳細", admin_order_cycle_path(order_cycle), class: "mr-3 font-medium text-stone-900" %>
-              <%= link_to "編集", edit_admin_order_cycle_path(order_cycle), class: "font-medium text-stone-900" %>
+              <%= link_to "編集", edit_admin_order_cycle_path(order_cycle), class: "mr-3 font-medium text-stone-900" %>
+              <%= link_to "PDF出力", admin_order_cycle_path(order_cycle, format: :pdf), class: "font-medium text-amber-700" %>
             </td>
           </tr>
         <% end %>

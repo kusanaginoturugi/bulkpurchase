@@ -2,7 +2,7 @@
 <% query_value = [order_item.item_code, order_item.item_name].compact.reject(&:blank?).join(" ") %>
 <% show_variant = order_item.variant_name.present? || order_item.item&.special_handling_type == "hakuyo_hakke" %>
 
-<div class="grid gap-3 px-4 py-4" style="grid-template-columns: 1.2fr 0.9fr 1.1fr 0.7fr 0.6fr 1fr auto;" data-controller="item-autocomplete">
+<div class="grid gap-3 px-4 py-4" style="grid-template-columns: 1.1fr 0.8fr 1.1fr 1.2fr 0.55fr 0.5fr 1fr auto;" data-controller="item-autocomplete">
   <div class="relative">
     <%= text_field_tag nil, query_value, placeholder: "コードまたは名称", disabled: readonly, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { action: "input->item-autocomplete#syncQuery input->item-autocomplete#search", item_autocomplete_target: "query", original_value: query_value } %>
     <div data-item-autocomplete-target="menu" class="absolute z-10 mt-1 hidden w-full rounded-xl border border-stone-200 bg-white shadow-lg"></div>
@@ -26,8 +26,11 @@
     <%= f.number_field :quantity, min: 1, readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100" %>
   </div>
 
-  <div class="space-y-3">
+  <div>
     <%= f.text_field :unit, readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { item_autocomplete_target: "unit" } %>
+  </div>
+
+  <div>
     <%= f.text_field :notes, readonly:, placeholder: "備考", class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100" %>
     <%= f.hidden_field :sort_order %>
     <%= f.hidden_field :_destroy %>

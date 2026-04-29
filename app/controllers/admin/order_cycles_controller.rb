@@ -11,6 +11,15 @@ module Admin
 
     def show
       @orders = @order_cycle.orders.includes(:organization, :user, :order_items)
+      respond_to do |format|
+        format.html
+        format.pdf do
+          send_data OrderSheetPdf.new(@order_cycle).render,
+                    filename: "#{@order_cycle.label}_一括道具注文書.pdf",
+                    type: "application/pdf",
+                    disposition: "attachment"
+        end
+      end
     end
 
     def create
@@ -41,8 +50,7 @@ module Admin
     end
 
     def order_cycle_params
-      params.require(:order_cycle).permit(:year, :month, :cycle_number, :deadline_at, :order_date, :arrival_date,
-                                          :status)
+      params.require(:order_cycle).permit(:year, :month, :deadline_at, :arrival_date, :status)
     end
   end
 end

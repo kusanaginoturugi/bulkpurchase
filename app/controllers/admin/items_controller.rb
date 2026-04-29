@@ -5,7 +5,7 @@ module Admin
     before_action :set_item, only: %i[edit update]
 
     def index
-      @items = Item.includes(:item_variants).order(:code)
+      @items = Item.managed.includes(:item_variants).order(:code)
       @item = Item.new(active: true, center_category: :other, special_handling_type: :none)
     end
 
@@ -16,7 +16,7 @@ module Admin
         sync_variants
         redirect_to admin_items_path, notice: "道具を登録しました。"
       else
-        @items = Item.includes(:item_variants).order(:code)
+        @items = Item.managed.includes(:item_variants).order(:code)
         render :index, status: :unprocessable_entity
       end
     end

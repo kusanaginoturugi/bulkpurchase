@@ -1,11 +1,10 @@
 <%= render "admin/shared/header", title: "注文サイクル詳細", description: @order_cycle.label %>
+<div class="mb-6">
+  <%= link_to "PDF出力", admin_order_cycle_path(@order_cycle, format: :pdf), class: "inline-flex rounded-xl bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700" %>
+</div>
 
 <section class="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm">
-  <div class="grid gap-4 md:grid-cols-4">
-    <div class="rounded-2xl bg-stone-50 p-4">
-      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">月例</p>
-      <p class="mt-2 font-medium text-stone-900"><%= @order_cycle.cycle_number %></p>
-    </div>
+  <div class="grid gap-4 md:grid-cols-3">
     <div class="rounded-2xl bg-stone-50 p-4">
       <p class="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">締切</p>
       <p class="mt-2 font-medium text-stone-900"><%= l(@order_cycle.deadline_at, format: :long) %></p>

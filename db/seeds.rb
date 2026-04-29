@@ -14,7 +14,9 @@ organization_codes = {
   '埼玉' => '31101',
   '千葉' => '31201',
   '大江戸' => '31303',
+  '羽田' => '31304',
   'お台場' => '31305',
+  'かながわ' => '31407',
   '山梨' => '31901',
   '富士山' => '32204',
   '駿天' => '32205',
@@ -53,6 +55,8 @@ sample_user.assign_attributes(
 sample_user.save!
 
 CSV.foreach(Rails.root.join('items.csv'), headers: true) do |row|
+  next unless row.fetch('code').start_with?('1', '2')
+
   item = Item.find_or_initialize_by(code: row.fetch('code'))
   item.assign_attributes(
     name: row.fetch('name'),

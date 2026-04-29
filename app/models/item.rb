@@ -19,6 +19,7 @@ class Item < ApplicationRecord
   validates :code, uniqueness: true
 
   scope :active, -> { where(active: true) }
+  scope :managed, -> { where("code LIKE ? OR code LIKE ?", "1%", "2%") }
   scope :searchable, -> { active.where(center_category: %w[center_1 center_2]) }
 
   def variant_required?

@@ -94,19 +94,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config
-
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Check for system tests
+        id: system_tests
+        run: |
+          if find test/system -name '*_test.rb' -print -quit | grep -q .; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install packages
+        if: steps.system_tests.outputs.present == 'true'
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config
+
       - name: Set up Ruby
+        if: steps.system_tests.outputs.present == 'true'
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: .ruby-version
           bundler-cache: true
 
       - name: Run System Tests
+        if: steps.system_tests.outputs.present == 'true'
         env:
           RAILS_ENV: test
         run: bin/rails db:test:prepare test:system

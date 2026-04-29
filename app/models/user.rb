@@ -19,6 +19,7 @@ class User < ApplicationRecord
   end
 
   validates :name, :email_address, :role, presence: true
+  validates :email_address, uniqueness: { case_sensitive: false }
 
   scope :active, -> { where(active: true) }
 end

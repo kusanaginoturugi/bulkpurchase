@@ -15,7 +15,7 @@ Rails.application.routes.draw do
     root "order_cycles#index"
 
     resources :organizations, only: %i[index create edit update]
-    resources :users, only: %i[index create edit update]
+    resources :users, only: %i[index create edit update destroy]
     resources :items, only: %i[index create edit update]
     resources :order_cycles, only: %i[index show create edit update]
     resources :orders, only: %i[index show edit update]

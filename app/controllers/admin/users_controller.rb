@@ -2,7 +2,7 @@
 
 module Admin
   class UsersController < BaseController
-    before_action :set_user, only: %i[edit update]
+    before_action :set_user, only: %i[edit update destroy]
     before_action :load_organizations, only: %i[index create edit update]
 
     def index
@@ -12,7 +12,6 @@ module Admin
 
     def create
       @user = User.new(user_params)
-      assign_role(@user)
 
       if @user.save
         redirect_to admin_users_path, notice: "ユーザーを登録しました。"
@@ -26,13 +25,24 @@ module Admin
 
     def update
       @user.assign_attributes(user_params)
-      assign_role(@user)
 
       if @user.save
         redirect_to admin_users_path, notice: "ユーザーを更新しました。"
       else
         render :edit, status: :unprocessable_entity
       end
+    end
+
+    def destroy
+      if @user == current_user
+        redirect_to admin_users_path, alert: "自分自身は削除できません。"
+        return
+      end
+
+      @user.destroy!
+      redirect_to admin_users_path, notice: "ユーザーを削除しました。"
+    rescue ActiveRecord::DeleteRestrictionError
+      redirect_to admin_users_path, alert: "注文履歴があるユーザーは削除できません。無効化してください。"
     end
 
     private
@@ -47,15 +57,13 @@ module Admin
 
     def user_params
       params.require(:user)
-            .permit(:name, :email_address, :password, :password_confirmation, :organization_id, :active)
+            .permit(:name, :email_address, :password, :password_confirmation, :organization_id, :role, :active)
             .tap do |permitted|
-              permitted.except!(:password, :password_confirmation) if permitted[:password].blank?
+              if action_name == "update" && permitted[:password].blank?
+                permitted.delete(:password)
+                permitted.delete(:password_confirmation)
+              end
             end
-    end
-
-    def assign_role(user)
-      role = params.dig(:user, :role).presence
-      user.role = role if role
     end
   end
 end

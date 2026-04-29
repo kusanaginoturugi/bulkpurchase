@@ -7,6 +7,8 @@ ja:
     formats:
       default: "%Y-%m-%d %H:%M"
       long: "%Y年%-m月%-d日 %H:%M"
+  errors:
+    format: "%{attribute}%{message}"
   enums:
     order_cycle:
       status:
@@ -21,3 +23,23 @@ ja:
       role:
         admin: "管理者"
         user: "一般ユーザー"
+  activerecord:
+    attributes:
+      user:
+        name: "氏名"
+        email_address: "メールアドレス"
+        password: "パスワード"
+        password_confirmation: "確認用パスワード"
+        organization: "伝道会"
+        organization_id: "伝道会"
+        role: "権限"
+        active: "有効"
+    errors:
+      messages:
+        blank: "を入力してください"
+        required: "を選択してください"
+        taken: "はすでに使われています"
+        confirmation: "が一致しません"
+        too_short: "は%{count}文字以上で入力してください"
+        too_long: "は%{count}文字以内で入力してください"
+        record_invalid: "入力内容を確認してください: %{errors}"

@@ -2,7 +2,7 @@
 
 module Admin
   class OrdersController < BaseController
-    before_action :set_order, only: %i[show edit update]
+    before_action :set_order, only: %i[show edit update destroy]
     before_action :load_organizations, only: %i[edit update]
 
     def index
@@ -30,6 +30,11 @@ module Admin
         build_blank_rows(1) if @order.order_items.empty?
         render :edit, status: :unprocessable_entity
       end
+    end
+
+    def destroy
+      @order.destroy!
+      redirect_to admin_orders_path, notice: "注文を削除しました。"
     end
 
     private

@@ -20,7 +20,8 @@
           <td class="py-3"><%= order.status_label %></td>
           <td class="py-3 text-right">
             <%= link_to "詳細", admin_order_path(order), class: "mr-3 font-medium text-stone-900" %>
-            <%= link_to "編集", edit_admin_order_path(order), class: "font-medium text-stone-900" %>
+            <%= link_to "編集", edit_admin_order_path(order), class: "mr-3 font-medium text-stone-900" %>
+            <%= button_to "削除", admin_order_path(order), method: :delete, class: "inline font-medium text-rose-700", form: { class: "inline", data: { turbo_confirm: "#{order.order_cycle.label} / #{order.organization.name} の注文を削除しますか？" } } %>
           </td>
         </tr>
       <% end %>

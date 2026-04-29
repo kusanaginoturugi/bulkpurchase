@@ -4,7 +4,7 @@
 
 <div class="grid gap-3 px-4 py-4" style="grid-template-columns: 1.2fr 0.9fr 1.1fr 0.7fr 0.6fr 1fr auto;" data-controller="item-autocomplete">
   <div class="relative">
-    <%= text_field_tag nil, query_value, placeholder: "コードまたは名称", disabled: readonly, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { action: "input->item-autocomplete#search", item_autocomplete_target: "query" } %>
+    <%= text_field_tag nil, query_value, placeholder: "コードまたは名称", disabled: readonly, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { action: "input->item-autocomplete#syncQuery input->item-autocomplete#search", item_autocomplete_target: "query", original_value: query_value } %>
     <div data-item-autocomplete-target="menu" class="absolute z-10 mt-1 hidden w-full rounded-xl border border-stone-200 bg-white shadow-lg"></div>
   </div>
 

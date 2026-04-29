@@ -3,6 +3,17 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["query", "menu", "itemId", "itemCode", "itemName", "variantName", "unit"]
 
+  syncQuery() {
+    const query = this.queryTarget.value.trim()
+    const originalValue = this.queryTarget.dataset.originalValue || ""
+
+    if (query === originalValue) return
+
+    this.itemIdTarget.value = ""
+    this.itemCodeTarget.value = ""
+    this.itemNameTarget.value = query
+  }
+
   search() {
     clearTimeout(this.timeout)
 

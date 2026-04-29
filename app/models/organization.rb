@@ -10,6 +10,6 @@ class Organization < ApplicationRecord
   scope :active, -> { where(active: true) }
 
   def display_name
-    [code.presence, name].compact.join(" ")
+    [ code.presence, name ].compact.join(" ")
   end
 end

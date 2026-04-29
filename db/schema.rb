@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 20_260_429_062_000) do
+ActiveRecord::Schema[8.0].define(version: 20_260_429_070_000) do
   create_table 'item_variants', force: :cascade do |t|
     t.integer 'item_id', null: false
     t.string 'name', null: false

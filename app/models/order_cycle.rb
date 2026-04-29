@@ -18,6 +18,7 @@ class OrderCycle < ApplicationRecord
 
   scope :recent_first, -> { order(year: :desc, month: :desc) }
   scope :editable_by_users, -> { where.not(status: "sent").recent_first }
+  scope :upcoming_for_users, -> { where.not(status: "sent").where(deadline_at: Time.current..).order(:deadline_at) }
 
   def label
     format("%<year>d年%<month>02d月", year:, month:)
@@ -32,7 +33,7 @@ class OrderCycle < ApplicationRecord
   end
 
   def self.current_for_user
-    editable_by_users.first
+    upcoming_for_users.first || editable_by_users.first
   end
 
   def self.status_options

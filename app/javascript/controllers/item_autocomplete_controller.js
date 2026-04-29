@@ -41,7 +41,7 @@ export default class extends Controller {
 
     this.menuTarget.innerHTML = items.map((item) => {
       const payload = JSON.stringify(item).replaceAll("\"", "&quot;")
-      return `<button type="button" data-payload="${payload}" class="block w-full border-b border-stone-100 px-3 py-2 text-left text-sm text-stone-700 hover:bg-stone-50" data-action="click->item-autocomplete#select">${item.code} ${item.name}</button>`
+      return `<button type="button" data-payload="${payload}" class="block w-full whitespace-nowrap border-b border-stone-100 px-3 py-2 text-left text-sm text-stone-700 hover:bg-stone-50" data-action="click->item-autocomplete#select">${item.code} ${item.name}</button>`
     }).join("")
 
     this.menuTarget.classList.remove("hidden")
@@ -57,13 +57,12 @@ export default class extends Controller {
     this.unitTarget.value = item.unit || ""
 
     if (item.special_handling_type === "hakuyo_hakke") {
-      this.variantNameTarget.classList.remove("hidden")
       if (!this.variantNameTarget.value && item.variants.length > 0) {
         this.variantNameTarget.placeholder = item.variants.map((variant) => variant.name).join(" / ")
       }
     } else {
       this.variantNameTarget.value = ""
-      this.variantNameTarget.classList.add("hidden")
+      this.variantNameTarget.placeholder = ""
     }
 
     this.hideMenu()

@@ -2,12 +2,13 @@
 
 class ItemsController < ApplicationController
   def search
-    query = params[:q].to_s.strip
+    query = params[:q].to_s.tr("０-９", "0-9").strip
 
     items = if query.present?
+              escaped_query = ActiveRecord::Base.sanitize_sql_like(query)
               Item.active
                   .managed
-                  .where("code LIKE :q OR name LIKE :q", q: "#{query}%")
+                  .where("code LIKE :q OR name LIKE :q", q: "#{escaped_query}%")
                   .includes(:item_variants)
                   .order(:code)
                   .limit(20)

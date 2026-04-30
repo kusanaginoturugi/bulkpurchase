@@ -1,4 +1,4 @@
-<%= render "admin/shared/header", title: "道具マスタ管理", description: "単位・護摩センター区分・特殊道具設定を更新します。" %>
+<%= render "admin/shared/header", title: "道具マスタ管理", description: "単位・特殊道具設定を更新します。" %>
 
 <div class="grid gap-6 lg:grid-cols-[1.25fr,0.75fr]">
   <section class="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm">
@@ -8,7 +8,6 @@
           <th class="py-3">コード</th>
           <th class="py-3">名称</th>
           <th class="py-3">単位</th>
-          <th class="py-3">区分</th>
           <th class="py-3"></th>
         </tr>
       </thead>
@@ -18,7 +17,6 @@
             <td class="py-3"><%= item.code %></td>
             <td class="py-3"><%= item.name %></td>
             <td class="py-3"><%= item.unit %></td>
-            <td class="py-3"><%= item.center_category %></td>
             <td class="py-3 text-right"><%= link_to "編集", edit_admin_item_path(item), class: "font-medium text-stone-900" %></td>
           </tr>
         <% end %>

@@ -9,15 +9,9 @@
       <%= form.text_field :name, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
     </div>
   </div>
-  <div class="grid gap-4 md:grid-cols-2">
-    <div>
-      <%= form.label :unit, "単位", class: "text-sm font-medium text-stone-700" %>
-      <%= form.text_field :unit, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
-    </div>
-    <div>
-      <%= form.label :center_category, "護摩センター区分", class: "text-sm font-medium text-stone-700" %>
-      <%= form.select :center_category, Item.center_categories.keys.map { |value| [value, value] }, {}, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
-    </div>
+  <div>
+    <%= form.label :unit, "単位", class: "text-sm font-medium text-stone-700" %>
+    <%= form.text_field :unit, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
   </div>
   <div class="grid gap-4 md:grid-cols-2">
     <div>

@@ -75,10 +75,18 @@ export default class extends Controller {
     this.itemNameTarget.value = item.name
     if (updateQuery) this.queryTarget.value = `${item.code} ${item.name}`
     this.unitTarget.value = item.unit || ""
-    this.updateVariantPlaceholder(item.name)
+    this.updateVariantPlaceholder(item)
   }
 
-  updateVariantPlaceholder(query) {
+  updateVariantPlaceholder(itemOrQuery) {
+    const query = typeof itemOrQuery === "string" ? itemOrQuery : itemOrQuery.name
+    const variants = typeof itemOrQuery === "string" ? [] : itemOrQuery.variants
+
+    if (variants.length > 0) {
+      this.variantNameTarget.placeholder = variants.map((variant) => variant.name).join("/")
+      return
+    }
+
     if (query.includes("白陽八卦符")) {
       this.variantNameTarget.placeholder = "無地/ヒルコ供養等"
     } else if (query.includes("おかげ符")) {

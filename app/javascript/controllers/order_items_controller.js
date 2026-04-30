@@ -3,20 +3,28 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["container", "template"]
 
-  add() {
+  add(event) {
     const content = this.templateTarget.innerHTML.replaceAll("NEW_RECORD", Date.now().toString())
-    this.containerTarget.insertAdjacentHTML("beforeend", content)
+    const row = event?.currentTarget.closest("[data-controller='item-autocomplete']")
+
+    if (row) {
+      row.insertAdjacentHTML("afterend", content)
+    } else {
+      this.containerTarget.insertAdjacentHTML("beforeend", content)
+    }
+
     this.reindex()
   }
 
   remove(event) {
     const row = event.currentTarget.closest("[data-controller='item-autocomplete']")
-    const idField = row.querySelector("input[name*='[id]']")
+    const idField = row.querySelector("input[name$='[id]']")
     const destroyField = row.querySelector("input[name*='[_destroy]']")
 
     if (idField && idField.value.length > 0 && destroyField) {
       destroyField.value = "1"
       row.classList.add("hidden")
+      row.hidden = true
     } else {
       row.remove()
     }
@@ -25,7 +33,7 @@ export default class extends Controller {
   }
 
   reindex() {
-    this.containerTarget.querySelectorAll("[data-controller='item-autocomplete']").forEach((row, index) => {
+    this.containerTarget.querySelectorAll("[data-controller='item-autocomplete']:not([hidden])").forEach((row, index) => {
       const input = row.querySelector("input[name*='[sort_order]']")
       if (input) input.value = index
     })

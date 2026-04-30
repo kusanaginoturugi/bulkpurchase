@@ -1,7 +1,7 @@
 <% order_item = f.object %>
 <% query_value = order_item.item_name.presence || order_item.item_code %>
 
-<div class="grid gap-3 px-4 py-4" style="grid-template-columns: 2fr 1.25fr 0.45fr 0.45fr 5.5rem;" data-controller="item-autocomplete">
+<div class="grid gap-3 px-4 py-4" style="grid-template-columns: 2fr 1.25fr 0.45fr 0.45fr 13rem;" data-controller="item-autocomplete">
   <div class="relative">
     <%= f.hidden_field :item_id, data: { item_autocomplete_target: "itemId" } %>
     <%= f.hidden_field :item_code, data: { item_autocomplete_target: "itemCode" } %>
@@ -25,8 +25,9 @@
   <%= f.hidden_field :sort_order %>
   <%= f.hidden_field :_destroy %>
 
-  <div class="flex items-start justify-end">
+  <div class="flex items-start justify-end gap-2">
     <% unless readonly %>
+      <button type="button" data-action="order-items#add" class="rounded-xl border border-dashed border-stone-400 px-3 py-3 text-lg text-stone-600 hover:border-stone-700 hover:text-stone-900">行を追加</button>
       <button type="button" data-action="order-items#remove" class="rounded-xl border border-rose-200 px-4 py-3 text-lg text-rose-700 hover:bg-rose-50">削除</button>
     <% end %>
   </div>

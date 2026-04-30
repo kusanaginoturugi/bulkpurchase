@@ -80,17 +80,11 @@ export default class extends Controller {
 
   updateVariantPlaceholder(itemOrQuery) {
     const query = typeof itemOrQuery === "string" ? itemOrQuery : itemOrQuery.name
-    const variants = typeof itemOrQuery === "string" ? [] : itemOrQuery.variants
-
-    if (variants.length > 0) {
-      this.variantNameTarget.placeholder = variants.map((variant) => variant.name).join("/")
-      return
-    }
 
     if (query.includes("白陽八卦符")) {
-      this.variantNameTarget.placeholder = "無地/ヒルコ供養等"
-    } else if (query.includes("おかげ符")) {
-      this.variantNameTarget.placeholder = "具体名を入力"
+      this.variantNameTarget.placeholder = "無地・ヒルコ供養等"
+    } else if (query.includes("如意棒") || query.includes("三會龍華之御柱")) {
+      this.variantNameTarget.placeholder = "通常・祈願会"
     } else {
       this.variantNameTarget.placeholder = ""
     }

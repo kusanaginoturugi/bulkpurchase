@@ -26,8 +26,8 @@
   </div>
 
   <div class="overflow-x-auto rounded-3xl border border-stone-200">
-    <div class="min-w-[820px]">
-      <div class="grid gap-3 border-b border-stone-200 bg-stone-50 px-4 py-3 text-left text-lg font-semibold uppercase tracking-[0.2em] text-stone-500" style="grid-template-columns: 2fr 1.25fr 0.45fr 0.45fr 5.5rem;">
+    <div class="min-w-[920px]">
+      <div class="grid gap-3 border-b border-stone-200 bg-stone-50 px-4 py-3 text-left text-lg font-semibold uppercase tracking-[0.2em] text-stone-500" style="grid-template-columns: 2fr 1.25fr 0.45fr 0.45fr 13rem;">
         <div>道具名</div>
         <div>種別</div>
         <div>数量</div>
@@ -42,12 +42,6 @@
       </div>
     </div>
   </div>
-
-  <% unless readonly %>
-    <button type="button" data-action="order-items#add" class="inline-flex rounded-xl border border-dashed border-stone-400 px-5 py-3 text-lg font-medium text-stone-600 hover:border-stone-700 hover:text-stone-900">
-      行を追加
-    </button>
-  <% end %>
 
   <template data-order-items-target="template">
     <%= form.fields_for :order_items, OrderItem.new(sort_order: order.order_items.size), child_index: "NEW_RECORD" do |item_fields| %>

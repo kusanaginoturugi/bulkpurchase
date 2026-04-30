@@ -6,6 +6,10 @@ module Admin
 
     def index
       @items = Item.managed.includes(:item_variants).order(:code)
+      @items_by_prefix = {
+        "1" => @items.select { |item| item.code.to_s.start_with?("1") },
+        "2" => @items.select { |item| item.code.to_s.start_with?("2") }
+      }
       @item = Item.new(active: true, center_category: :other, special_handling_type: :none)
     end
 
@@ -17,6 +21,10 @@ module Admin
         redirect_to admin_items_path, notice: "道具を登録しました。"
       else
         @items = Item.managed.includes(:item_variants).order(:code)
+        @items_by_prefix = {
+          "1" => @items.select { |item| item.code.to_s.start_with?("1") },
+          "2" => @items.select { |item| item.code.to_s.start_with?("2") }
+        }
         render :index, status: :unprocessable_entity
       end
     end

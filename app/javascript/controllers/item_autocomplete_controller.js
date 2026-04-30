@@ -73,7 +73,7 @@ export default class extends Controller {
     this.itemIdTarget.value = item.id
     this.itemCodeTarget.value = item.code
     this.itemNameTarget.value = item.name
-    if (updateQuery) this.queryTarget.value = `${item.code} ${item.name}`
+    if (updateQuery) this.queryTarget.value = item.name
     this.unitTarget.value = item.unit || ""
     this.updateVariantPlaceholder(item)
   }

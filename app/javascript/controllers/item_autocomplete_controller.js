@@ -3,6 +3,12 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["query", "menu", "itemId", "itemCode", "itemName", "variantName", "unit"]
 
+  connect() {
+    if (this.variantNameTarget.value.trim() === "") {
+      this.updateVariantPlaceholder(this.queryTarget.value.trim())
+    }
+  }
+
   syncQuery() {
     const query = this.queryTarget.value.trim()
     const originalValue = this.queryTarget.dataset.originalValue || ""

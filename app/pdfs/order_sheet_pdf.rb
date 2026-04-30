@@ -34,13 +34,13 @@ class OrderSheetPdf
 
   def draw_header(pdf)
     pdf.text "※#{month_day_with_weekday(@order_cycle.arrival_date)}までに弥勒大仏殿着でお願いします。",
-             size: 15,
+             size: 17,
              style: :bold,
              align: :center
     pdf.move_down 4
-    pdf.text "聖明王院　一括道具注文書", size: 18, align: :center
+    pdf.text "聖明王院　一括道具注文書", size: 21, align: :center
     pdf.move_down 8
-    pdf.text "【注文日】 #{japanese_era_date(@order_cycle.order_date)}", size: 12
+    pdf.text "【注文日】 #{japanese_era_date(@order_cycle.order_date)}", size: 14
     pdf.move_down 6
   end
 
@@ -50,7 +50,7 @@ class OrderSheetPdf
     name_width = 128
     total_width = 52
     quantity_width = (pdf.bounds.width - name_width - total_width) / [ organizations.size, 1 ].max
-    row_height = 28
+    row_height = 34
 
     draw_row(pdf, [ "", *organizations.map(&:name), "合計" ], [ name_width, *([ quantity_width ] * organizations.size), total_width ], row_height, header: true)
 
@@ -74,14 +74,14 @@ class OrderSheetPdf
       width = widths[index]
       pdf.stroke_rectangle [ x, y ], width, height
       pdf.text_box cell.to_s,
-                   at: [ x + 3, y - 6 ],
+                   at: [ x + 4, y - 7 ],
                    width: width - 6,
-                   height: height - 8,
-                   size: header ? 10 : 9,
+                   height: height - 10,
+                   size: header ? 16 : 15,
                    align: :center,
                    valign: :center,
                    overflow: :shrink_to_fit,
-                   min_font_size: 7
+                   min_font_size: 10
       x += width
     end
 

@@ -9,8 +9,10 @@ export default class extends Controller {
 
     if (row) {
       row.insertAdjacentHTML("afterend", content)
+      row.nextElementSibling?.querySelector("[data-item-autocomplete-target~='query']")?.focus()
     } else {
       this.containerTarget.insertAdjacentHTML("beforeend", content)
+      this.containerTarget.lastElementChild?.querySelector("[data-item-autocomplete-target~='query']")?.focus()
     }
 
     this.reindex()

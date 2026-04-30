@@ -3,6 +3,7 @@
 
 <div class="grid gap-3 px-4 py-4" style="grid-template-columns: 2fr 1.25fr 0.45fr 0.45fr 13rem;" data-controller="item-autocomplete">
   <div class="relative">
+    <%= f.hidden_field :id if order_item.persisted? %>
     <%= f.hidden_field :item_id, data: { item_autocomplete_target: "itemId" } %>
     <%= f.hidden_field :item_code, data: { item_autocomplete_target: "itemCode" } %>
     <%= f.text_field :item_name, placeholder: "コードまたは道具名", readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { action: "input->item-autocomplete#syncQuery input->item-autocomplete#search", item_autocomplete_target: "query itemName", original_value: query_value } %>
@@ -11,7 +12,7 @@
 
   <div>
     <%= f.hidden_field :item_variant_id %>
-    <%= f.text_field :variant_name, placeholder: "無地 / 有気復命", readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { item_autocomplete_target: "variantName" } %>
+    <%= f.text_field :variant_name, readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { item_autocomplete_target: "variantName" } %>
   </div>
 
   <div>

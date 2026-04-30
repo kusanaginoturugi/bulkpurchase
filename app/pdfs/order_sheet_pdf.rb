@@ -50,7 +50,7 @@ class OrderSheetPdf
     name_width = 128
     total_width = 52
     quantity_width = (pdf.bounds.width - name_width - total_width) / [ organizations.size, 1 ].max
-    row_height = 34
+    row_height = 44
 
     draw_row(pdf, [ "", *organizations.map(&:name), "合計" ], [ name_width, *([ quantity_width ] * organizations.size), total_width ], row_height, header: true)
 
@@ -58,7 +58,7 @@ class OrderSheetPdf
       pdf.start_new_page if pdf.cursor < row_height + 28
 
       cells = [
-        row[:name],
+        formatted_item_name(row[:name]),
         *organizations.map { |organization| row[:quantities][organization.id].presence || "" },
         row[:total]
       ]
@@ -73,12 +73,16 @@ class OrderSheetPdf
     cells.each_with_index do |cell, index|
       width = widths[index]
       pdf.stroke_rectangle [ x, y ], width, height
+      number_cell = !header && index.positive?
+      text_width = number_cell ? [ width * 0.5, 34 ].max : width - 8
+      text_x = number_cell ? x + ((width - text_width) / 2.0) : x + 4
+
       pdf.text_box cell.to_s,
-                   at: [ x + 4, y - 7 ],
-                   width: width - 6,
-                   height: height - 10,
+                   at: [ text_x, y - 6 ],
+                   width: text_width,
+                   height: height - 8,
                    size: header ? 16 : 15,
-                   align: :center,
+                   align: number_cell ? :right : :center,
                    valign: :center,
                    overflow: :shrink_to_fit,
                    min_font_size: 10
@@ -115,6 +119,13 @@ class OrderSheetPdf
     grouped.values
            .sort_by { |row| [ row[:code], row[:name] ] }
            .map { |row| row.merge(total: row[:quantities].values.sum) }
+  end
+
+  def formatted_item_name(name)
+    name.to_s
+        .gsub(%r{\s*/\s*}, "\n")
+        .gsub(/\s*([（(])/, "\n\\1")
+        .gsub(/・\s*/, "・\n")
   end
 
   def month_day_with_weekday(date)

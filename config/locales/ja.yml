@@ -38,6 +38,20 @@ ja:
         code: "伝道会番号"
         name: "名称"
         active: "有効"
+      order:
+        orderer_name: "注文者名"
+        pickup_name: "持ち帰り者名"
+        order_items: "道具明細"
+      order_item:
+        item_name: "道具名"
+        variant_name: "種別"
+        quantity: "数量"
+        unit: "単位"
+      order/order_items:
+        item_name: "道具名"
+        variant_name: "種別"
+        quantity: "数量"
+        unit: "単位"
     errors:
       messages:
         blank: "を入力してください"

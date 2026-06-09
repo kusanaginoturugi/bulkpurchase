@@ -32,7 +32,7 @@
   <summary class="cursor-pointer text-sm font-semibold text-stone-700">マスタ連携 (普段は閉じておく)</summary>
 
   <div class="mt-4 flex flex-wrap items-center gap-3">
-    <%= button_to "マスタ同期", sync_admin_fellowships_path, method: :post, class: "rounded-xl bg-stone-900 px-5 py-2 text-sm font-medium text-white" %>
+    <%= button_to "マスタ同期", sync_admin_fellowships_path, method: :post, class: "rounded-xl bg-stone-900 px-5 py-2 text-sm font-medium text-white disabled:opacity-50", data: { turbo_submits_with: "同期中…" } %>
     <p class="text-xs text-stone-500">osystem-masters から伝道会一覧を取得して、bulkpurchase の fellowships に反映する。enabled は触らない。</p>
   </div>
 
@@ -47,6 +47,6 @@
         </label>
       <% end %>
     </div>
-    <%= form.submit "対象を保存", class: "rounded-xl bg-stone-900 px-5 py-2 text-sm font-medium text-white" %>
+    <%= form.submit "対象を保存", class: "rounded-xl bg-stone-900 px-5 py-2 text-sm font-medium text-white disabled:opacity-50", data: { turbo_submits_with: "保存中…" } %>
   <% end %>
 </details>

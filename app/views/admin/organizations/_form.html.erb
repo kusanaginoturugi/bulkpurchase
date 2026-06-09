@@ -20,10 +20,14 @@
   </div>
   <label class="flex items-center gap-3 text-sm text-stone-700">
     <%= form.check_box :active %>
-    有効
+    有効 (active)
+  </label>
+  <label class="flex items-center gap-3 text-sm text-stone-700">
+    <%= form.check_box :enabled %>
+    注文対象 (enabled)
   </label>
   <div class="flex gap-3">
-    <%= form.submit(organization.persisted? ? "伝道会を更新" : "伝道会を登録", class: "rounded-xl bg-stone-900 px-5 py-3 text-sm font-medium text-white") %>
+    <%= form.submit "伝道会を更新", class: "rounded-xl bg-stone-900 px-5 py-3 text-sm font-medium text-white" %>
     <%= link_to "一覧へ戻る", admin_organizations_path, class: "rounded-xl border border-stone-300 px-5 py-3 text-sm font-medium text-stone-700" %>
   </div>
 <% end %>

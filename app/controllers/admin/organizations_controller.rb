@@ -5,19 +5,8 @@ module Admin
     before_action :set_organization, only: %i[edit update destroy]
 
     def index
-      @organizations = Organization.order(:code, :name)
-      @organization = Organization.new(active: true)
-    end
-
-    def create
-      @organization = Organization.new(organization_params)
-
-      if @organization.save
-        redirect_to admin_organizations_path, notice: "伝道会を登録しました。"
-      else
-        @organizations = Organization.order(:code, :name)
-        render :index, status: :unprocessable_entity
-      end
+      @organizations = Organization.where(enabled: true).order(:code, :name)
+      @all_organizations = Organization.order(:code, :name)
     end
 
     def edit; end
@@ -37,6 +26,25 @@ module Admin
       redirect_to admin_organizations_path, alert: "ユーザーまたは注文がある伝道会は削除できません。無効化してください。"
     end
 
+    def sync
+      result = MasterSync.run
+      redirect_to admin_organizations_path,
+                  notice: "マスタから #{result.count} 件を同期しました。"
+    rescue MasterSync::FetchError => e
+      redirect_to admin_organizations_path, alert: "マスタ同期に失敗しました: #{e.message}"
+    end
+
+    def bulk_update_enabled
+      enabled_ids = Array(params[:enabled]).map(&:to_i).to_set
+      Organization.transaction do
+        Organization.find_each do |organization|
+          want = enabled_ids.include?(organization.id)
+          organization.update!(enabled: want) if organization.enabled != want
+        end
+      end
+      redirect_to admin_organizations_path, notice: "対象伝道会を更新しました。"
+    end
+
     private
 
     def set_organization
@@ -44,7 +52,7 @@ module Admin
     end
 
     def organization_params
-      params.require(:organization).permit(:code, :name, :active)
+      params.require(:organization).permit(:code, :name, :active, :enabled)
     end
   end
 end

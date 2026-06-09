@@ -1,7 +1,7 @@
 <% readonly = local_assigns.fetch(:readonly, !order.editable_by_user?) %>
 <% form_method = order.persisted? ? :patch : :post %>
-<% organization_selectable = local_assigns.fetch(:organization_selectable, false) %>
-<% organizations = local_assigns.fetch(:organizations, []) %>
+<% fellowship_selectable = local_assigns.fetch(:fellowship_selectable, false) %>
+<% fellowships = local_assigns.fetch(:fellowships, []) %>
 <% form_url = local_assigns.fetch(:form_url, current_order_path) %>
 <% back_path = local_assigns[:back_path] %>
 
@@ -9,10 +9,10 @@
   <div class="grid gap-6 md:grid-cols-3">
     <div>
       <label class="text-lg font-medium text-stone-700">伝道会名</label>
-      <% if organization_selectable %>
-        <%= form.collection_select :organization_id, organizations, :id, :display_name, {}, disabled: readonly, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3 text-lg focus:border-amber-500 focus:bg-white focus:outline-none disabled:cursor-not-allowed disabled:bg-stone-100" %>
+      <% if fellowship_selectable %>
+        <%= form.collection_select :fellowship_id, fellowships, :id, :display_name, {}, disabled: readonly, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3 text-lg focus:border-amber-500 focus:bg-white focus:outline-none disabled:cursor-not-allowed disabled:bg-stone-100" %>
       <% else %>
-        <div class="mt-2 rounded-xl border border-stone-200 bg-stone-100 px-4 py-3 text-lg text-stone-700"><%= order.organization&.display_name || current_user.organization.display_name %></div>
+        <div class="mt-2 rounded-xl border border-stone-200 bg-stone-100 px-4 py-3 text-lg text-stone-700"><%= order.fellowship&.display_name || current_user.fellowship.display_name %></div>
       <% end %>
     </div>
     <div>

@@ -9,7 +9,7 @@ module Admin
     end
 
     def show
-      @orders = @order_cycle.orders.includes(:organization, :user, :order_items)
+      @orders = @order_cycle.orders.includes(:fellowship, :user, :order_items)
       respond_to do |format|
         format.html
         format.pdf do

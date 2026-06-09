@@ -15,8 +15,8 @@
   <%= render "current_orders/form",
     order: @order,
     form_url: admin_order_path(@order),
-    organization_selectable: true,
-    organizations: @organizations,
+    fellowship_selectable: true,
+    fellowships: @fellowships,
     readonly: false,
     detail_path: admin_order_path(@order),
     back_path: admin_orders_path %>

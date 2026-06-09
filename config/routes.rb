@@ -14,7 +14,7 @@ Rails.application.routes.draw do
   namespace :admin do
     root "order_cycles#index"
 
-    resources :organizations, only: %i[index edit update destroy] do
+    resources :fellowships, only: %i[index edit update destroy] do
       collection do
         post :sync
         patch :bulk_update_enabled

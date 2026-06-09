@@ -46,23 +46,23 @@ class OrderSheetPdf
 
   def draw_table(pdf)
     rows = aggregated_rows
-    organizations = submitted_organizations
+    fellowships = submitted_fellowships
     name_width = 128
     total_width = 52
-    quantity_width = (pdf.bounds.width - name_width - total_width) / [ organizations.size, 1 ].max
+    quantity_width = (pdf.bounds.width - name_width - total_width) / [ fellowships.size, 1 ].max
     row_height = 44
 
-    draw_row(pdf, [ "", *organizations.map(&:name), "合計" ], [ name_width, *([ quantity_width ] * organizations.size), total_width ], row_height, header: true)
+    draw_row(pdf, [ "", *fellowships.map(&:name), "合計" ], [ name_width, *([ quantity_width ] * fellowships.size), total_width ], row_height, header: true)
 
     rows.each do |row|
       pdf.start_new_page if pdf.cursor < row_height + 28
 
       cells = [
         formatted_item_name(row[:name]),
-        *organizations.map { |organization| row[:quantities][organization.id].presence || "" },
+        *fellowships.map { |fellowship| row[:quantities][fellowship.id].presence || "" },
         row[:total]
       ]
-      draw_row(pdf, cells, [ name_width, *([ quantity_width ] * organizations.size), total_width ], row_height)
+      draw_row(pdf, cells, [ name_width, *([ quantity_width ] * fellowships.size), total_width ], row_height)
     end
   end
 
@@ -92,19 +92,19 @@ class OrderSheetPdf
     pdf.move_down height
   end
 
-  def submitted_organizations
-    @submitted_organizations ||= @order_cycle.orders
+  def submitted_fellowships
+    @submitted_fellowships ||= @order_cycle.orders
                                          .submitted
-                                         .includes(:organization)
-                                         .map(&:organization)
+                                         .includes(:fellowship)
+                                         .map(&:fellowship)
                                          .uniq
-                                         .sort_by { |organization| [ organization.code.to_s, organization.name ] }
+                                         .sort_by { |fellowship| [ fellowship.code.to_s, fellowship.name ] }
   end
 
   def aggregated_rows
     grouped = {}
 
-    @order_cycle.orders.submitted.includes(:organization, order_items: :item).find_each do |order|
+    @order_cycle.orders.submitted.includes(:fellowship, order_items: :item).find_each do |order|
       order.order_items.each do |order_item|
         key = [ order_item.item_code.to_s, order_item.output_name, order_item.unit.to_s ]
         grouped[key] ||= {
@@ -112,7 +112,7 @@ class OrderSheetPdf
           name: order_item.output_name,
           quantities: Hash.new(0)
         }
-        grouped[key][:quantities][order.organization_id] += order_item.quantity
+        grouped[key][:quantities][order.fellowship_id] += order_item.quantity
       end
     end
 

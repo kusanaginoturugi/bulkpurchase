@@ -11,15 +11,15 @@
       </tr>
     </thead>
     <tbody class="divide-y divide-stone-200">
-      <% @organizations.each do |organization| %>
+      <% @fellowships.each do |fellowship| %>
         <tr>
-          <td class="w-28 py-3 pr-2"><%= organization.code %></td>
-          <td class="py-3 pl-0"><%= organization.name %></td>
-          <td class="py-3"><%= organization.active? ? "有効" : "無効" %></td>
+          <td class="w-28 py-3 pr-2"><%= fellowship.code %></td>
+          <td class="py-3 pl-0"><%= fellowship.name %></td>
+          <td class="py-3"><%= fellowship.active? ? "有効" : "無効" %></td>
           <td class="py-3">
             <div class="flex justify-end gap-3">
-              <%= link_to "編集", edit_admin_organization_path(organization), class: "font-medium text-stone-900" %>
-              <%= button_to "削除", admin_organization_path(organization), method: :delete, class: "font-medium text-rose-700", form: { data: { turbo_confirm: "#{organization.display_name}を削除しますか？" } } %>
+              <%= link_to "編集", edit_admin_fellowship_path(fellowship), class: "font-medium text-stone-900" %>
+              <%= button_to "削除", admin_fellowship_path(fellowship), method: :delete, class: "font-medium text-rose-700", form: { data: { turbo_confirm: "#{fellowship.display_name}を削除しますか？" } } %>
             </div>
           </td>
         </tr>
@@ -32,18 +32,18 @@
   <summary class="cursor-pointer text-sm font-semibold text-stone-700">マスタ連携 (普段は閉じておく)</summary>
 
   <div class="mt-4 flex flex-wrap items-center gap-3">
-    <%= button_to "マスタ同期", sync_admin_organizations_path, method: :post, class: "rounded-xl bg-stone-900 px-5 py-2 text-sm font-medium text-white" %>
-    <p class="text-xs text-stone-500">osystem-masters から伝道会一覧を取得して、bulkpurchase の organizations に反映する。enabled は触らない。</p>
+    <%= button_to "マスタ同期", sync_admin_fellowships_path, method: :post, class: "rounded-xl bg-stone-900 px-5 py-2 text-sm font-medium text-white" %>
+    <p class="text-xs text-stone-500">osystem-masters から伝道会一覧を取得して、bulkpurchase の fellowships に反映する。enabled は触らない。</p>
   </div>
 
-  <%= form_with url: bulk_update_enabled_admin_organizations_path, method: :patch, class: "mt-6 space-y-4" do |form| %>
+  <%= form_with url: bulk_update_enabled_admin_fellowships_path, method: :patch, class: "mt-6 space-y-4" do |form| %>
     <p class="text-xs text-stone-500">注文対象とする伝道会にチェックを入れて「対象を保存」を押す。チェックを外しても master 側は変わらない。</p>
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-      <% @all_organizations.each do |organization| %>
+      <% @all_fellowships.each do |fellowship| %>
         <label class="flex items-center gap-2 rounded-xl border border-stone-200 px-3 py-2 text-sm">
-          <%= check_box_tag "enabled[]", organization.id, organization.enabled, id: "enabled_#{organization.id}" %>
-          <span class="font-mono text-xs text-stone-500"><%= organization.code.presence || "-----" %></span>
-          <span><%= organization.name %></span>
+          <%= check_box_tag "enabled[]", fellowship.id, fellowship.enabled, id: "enabled_#{fellowship.id}" %>
+          <span class="font-mono text-xs text-stone-500"><%= fellowship.code.presence || "-----" %></span>
+          <span><%= fellowship.name %></span>
         </label>
       <% end %>
     </div>

@@ -3,10 +3,10 @@
 module Admin
   class UsersController < BaseController
     before_action :set_user, only: %i[edit update destroy]
-    before_action :load_organizations, only: %i[index create edit update]
+    before_action :load_fellowships, only: %i[index create edit update]
 
     def index
-      @users = User.includes(:organization).order(:name)
+      @users = User.includes(:fellowship).order(:name)
       @user = User.new(active: true, role: :user)
     end
 
@@ -16,7 +16,7 @@ module Admin
       if @user.save
         redirect_to admin_users_path, notice: "ユーザーを登録しました。"
       else
-        @users = User.includes(:organization).order(:name)
+        @users = User.includes(:fellowship).order(:name)
         render :index, status: :unprocessable_entity
       end
     end
@@ -51,13 +51,13 @@ module Admin
       @user = User.find(params[:id])
     end
 
-    def load_organizations
-      @organizations = Organization.active.order(:name)
+    def load_fellowships
+      @fellowships = Fellowship.active.order(:name)
     end
 
     def user_params
       params.require(:user)
-            .permit(:name, :email_address, :password, :password_confirmation, :organization_id, :role, :active)
+            .permit(:name, :email_address, :password, :password_confirmation, :fellowship_id, :role, :active)
             .tap do |permitted|
               if action_name == "update" && permitted[:password].blank?
                 permitted.delete(:password)

@@ -30,11 +30,11 @@ ja:
         email_address: "メールアドレス"
         password: "パスワード"
         password_confirmation: "確認用パスワード"
-        organization: "伝道会"
-        organization_id: "伝道会"
+        fellowship: "伝道会"
+        fellowship_id: "伝道会"
         role: "権限"
         active: "有効"
-      organization:
+      fellowship:
         code: "伝道会番号"
         name: "名称"
         active: "有効"

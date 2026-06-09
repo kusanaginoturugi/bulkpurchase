@@ -43,10 +43,10 @@ class MasterSync
   # enabled は同期で触らない (運用側のフラグ)。
   # name は bulkpurchase の表示で短名を使いたいので short_name を優先する。
   def upsert(row)
-    organization = Organization.find_or_initialize_by(id: row.fetch("id"))
-    organization.code = row["code"]
-    organization.name = row["short_name"].presence || row["name"]
-    organization.active = row["active"].to_i == 1
-    organization.save!
+    fellowship = Fellowship.find_or_initialize_by(id: row.fetch("id"))
+    fellowship.code = row["code"]
+    fellowship.name = row["short_name"].presence || row["name"]
+    fellowship.active = row["active"].to_i == 1
+    fellowship.save!
   end
 end

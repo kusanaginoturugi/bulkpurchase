@@ -10,7 +10,7 @@ def infer_unit(name)
   '個'
 end
 
-organization_codes = {
+fellowship_codes = {
   '埼玉' => '31101',
   '千葉' => '31201',
   '大江戸' => '31303',
@@ -23,12 +23,12 @@ organization_codes = {
   '聖明王院' => '99300'
 }
 
-organizations = organization_codes.each_with_object({}) do |(name, code), result|
-  Organization.find_or_initialize_by(name:).tap do |organization|
-    organization.code = code
-    organization.active = true
-    organization.save!
-    result[name] = organization
+fellowships = fellowship_codes.each_with_object({}) do |(name, code), result|
+  Fellowship.find_or_initialize_by(name:).tap do |fellowship|
+    fellowship.code = code
+    fellowship.active = true
+    fellowship.save!
+    result[name] = fellowship
   end
 end
 
@@ -37,7 +37,7 @@ admin.assign_attributes(
   name: '管理者',
   password: 'password',
   password_confirmation: 'password',
-  organization: organizations.fetch('富士山'),
+  fellowship: fellowships.fetch('富士山'),
   role: :admin,
   active: true
 )
@@ -48,7 +48,7 @@ sample_user.assign_attributes(
   name: 'サンプル会員',
   password: 'password',
   password_confirmation: 'password',
-  organization: organizations.fetch('山梨'),
+  fellowship: fellowships.fetch('山梨'),
   role: :user,
   active: true
 )

@@ -1,9 +1,9 @@
-<%= form_with model: [ :admin, organization ], class: "mt-6 space-y-4" do |form| %>
-  <% if organization.errors.any? %>
+<%= form_with model: [ :admin, fellowship ], class: "mt-6 space-y-4" do |form| %>
+  <% if fellowship.errors.any? %>
     <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
       <p class="font-semibold">入力内容を確認してください。</p>
       <ul class="mt-2 list-disc pl-5">
-        <% organization.errors.full_messages.each do |message| %>
+        <% fellowship.errors.full_messages.each do |message| %>
           <li><%= message %></li>
         <% end %>
       </ul>
@@ -28,6 +28,6 @@
   </label>
   <div class="flex gap-3">
     <%= form.submit "伝道会を更新", class: "rounded-xl bg-stone-900 px-5 py-3 text-sm font-medium text-white" %>
-    <%= link_to "一覧へ戻る", admin_organizations_path, class: "rounded-xl border border-stone-300 px-5 py-3 text-sm font-medium text-stone-700" %>
+    <%= link_to "一覧へ戻る", admin_fellowships_path, class: "rounded-xl border border-stone-300 px-5 py-3 text-sm font-medium text-stone-700" %>
   </div>
 <% end %>

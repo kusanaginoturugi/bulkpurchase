@@ -5,7 +5,7 @@ class CurrentOrdersController < ApplicationController
   before_action :set_order
 
   def show
-    @organizations = Organization.active.order(:name)
+    @fellowships = Fellowship.active.order(:name)
     build_blank_rows if @order.order_items.empty?
   end
 
@@ -29,7 +29,7 @@ class CurrentOrdersController < ApplicationController
                            .includes(order_items: %i[item item_variant])
                            .find_or_initialize_by(order_cycle: @order_cycle)
                            .tap do |order|
-                 order.organization ||= current_user.organization
+                 order.fellowship ||= current_user.fellowship
                  order.orderer_name ||= current_user.name
                end
     else
@@ -56,7 +56,7 @@ class CurrentOrdersController < ApplicationController
 
     @order.assign_attributes(order_params)
     @order.user = current_user
-    @order.organization = current_user.organization
+    @order.fellowship = current_user.fellowship
     @order.order_cycle = @order_cycle
 
     if params[:commit_action] == "submit"
@@ -69,7 +69,7 @@ class CurrentOrdersController < ApplicationController
       message = params[:commit_action] == "submit" ? "注文を提出しました。" : "注文を保存しました。"
       redirect_to current_order_path, notice: message
     else
-      @organizations = Organization.active.order(:name)
+      @fellowships = Fellowship.active.order(:name)
       build_blank_rows(1) if @order.order_items.empty?
       render :show, status: :unprocessable_entity
     end

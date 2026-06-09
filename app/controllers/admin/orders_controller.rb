@@ -3,10 +3,10 @@
 module Admin
   class OrdersController < BaseController
     before_action :set_order, only: %i[show edit update destroy]
-    before_action :load_organizations, only: %i[edit update]
+    before_action :load_fellowships, only: %i[edit update]
 
     def index
-      @orders = Order.includes(:organization, :user, :order_cycle).order(created_at: :desc)
+      @orders = Order.includes(:fellowship, :user, :order_cycle).order(created_at: :desc)
     end
 
     def show; end
@@ -40,12 +40,12 @@ module Admin
     private
 
     def set_order
-      @order = Order.includes(:organization, :user, :order_cycle,
+      @order = Order.includes(:fellowship, :user, :order_cycle,
                               order_items: %i[item item_variant]).find(params[:id])
     end
 
-    def load_organizations
-      @organizations = Organization.active.order(:name)
+    def load_fellowships
+      @fellowships = Fellowship.active.order(:name)
     end
 
     def build_blank_rows(count = 1)
@@ -58,7 +58,7 @@ module Admin
       params.require(:order).permit(
         :orderer_name,
         :pickup_name,
-        :organization_id,
+        :fellowship_id,
         :status,
         order_items_attributes: %i[
           id item_id item_variant_id item_code item_name variant_name quantity unit notes sort_order _destroy

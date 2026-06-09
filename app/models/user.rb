@@ -2,7 +2,7 @@
 
 class User < ApplicationRecord
   has_secure_password
-  belongs_to :organization
+  belongs_to :fellowship
   has_many :sessions, dependent: :destroy
   has_many :orders, dependent: :restrict_with_exception
 

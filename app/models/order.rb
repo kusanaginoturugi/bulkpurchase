@@ -2,7 +2,7 @@
 
 class Order < ApplicationRecord
   belongs_to :user
-  belongs_to :organization
+  belongs_to :fellowship
   belongs_to :order_cycle
   has_many :order_items, -> { order(:sort_order, :id) }, dependent: :destroy, inverse_of: :order
 
@@ -23,7 +23,7 @@ class Order < ApplicationRecord
   validates :user_id, uniqueness: { scope: :order_cycle_id }
   validate :submitted_orders_must_have_items
 
-  before_validation :sync_organization
+  before_validation :sync_fellowship
 
   def editable_by_user?
     order_cycle.editable_by_users?
@@ -40,8 +40,8 @@ class Order < ApplicationRecord
 
   private
 
-  def sync_organization
-    self.organization ||= user&.organization
+  def sync_fellowship
+    self.fellowship ||= user&.fellowship
   end
 
   def submitted_orders_must_have_items

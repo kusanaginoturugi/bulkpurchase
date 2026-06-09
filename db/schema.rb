@@ -10,7 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_09_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_09_030000) do
+  create_table "fellowships", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.string "code"
+    t.datetime "created_at", null: false
+    t.boolean "enabled", default: false, null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_fellowships_on_code", unique: true
+    t.index ["name"], name: "index_fellowships_on_name", unique: true
+  end
+
   create_table "item_variants", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
@@ -70,29 +81,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_09_020000) do
 
   create_table "orders", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.integer "fellowship_id", null: false
     t.integer "order_cycle_id", null: false
     t.string "orderer_name", null: false
-    t.integer "organization_id", null: false
     t.string "pickup_name", null: false
     t.string "status", default: "draft", null: false
     t.datetime "submitted_at"
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["fellowship_id"], name: "index_orders_on_fellowship_id"
     t.index ["order_cycle_id"], name: "index_orders_on_order_cycle_id"
-    t.index ["organization_id"], name: "index_orders_on_organization_id"
     t.index ["user_id", "order_cycle_id"], name: "index_orders_on_user_id_and_order_cycle_id", unique: true
     t.index ["user_id"], name: "index_orders_on_user_id"
-  end
-
-  create_table "organizations", force: :cascade do |t|
-    t.boolean "active", default: true, null: false
-    t.string "code"
-    t.datetime "created_at", null: false
-    t.boolean "enabled", default: false, null: false
-    t.string "name", null: false
-    t.datetime "updated_at", null: false
-    t.index ["code"], name: "index_organizations_on_code", unique: true
-    t.index ["name"], name: "index_organizations_on_name", unique: true
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -108,22 +108,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_09_020000) do
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.string "email_address", null: false
+    t.integer "fellowship_id", null: false
     t.string "name", null: false
-    t.integer "organization_id", null: false
     t.string "password_digest", null: false
     t.string "role", default: "user", null: false
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
-    t.index ["organization_id"], name: "index_users_on_organization_id"
+    t.index ["fellowship_id"], name: "index_users_on_fellowship_id"
   end
 
   add_foreign_key "item_variants", "items"
   add_foreign_key "order_items", "item_variants"
   add_foreign_key "order_items", "items"
   add_foreign_key "order_items", "orders"
+  add_foreign_key "orders", "fellowships"
   add_foreign_key "orders", "order_cycles"
-  add_foreign_key "orders", "organizations"
   add_foreign_key "orders", "users"
   add_foreign_key "sessions", "users"
-  add_foreign_key "users", "organizations"
+  add_foreign_key "users", "fellowships"
 end

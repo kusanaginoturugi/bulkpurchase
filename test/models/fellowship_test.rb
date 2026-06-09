@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-class OrganizationTest < ActiveSupport::TestCase
+class FellowshipTest < ActiveSupport::TestCase
   # test "the truth" do
   #   assert true
   # end

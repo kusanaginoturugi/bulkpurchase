@@ -147,11 +147,11 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           port: ${{ secrets.EC2_PORT }}
-          username: ubuntu
+          username: admin
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu/bulkpurchase
+            cd /home/admin/bulkpurchase
             git config core.fileMode false
             git fetch origin
             git checkout origin/main -- scripts/deploy.sh
-            bash /home/ubuntu/bulkpurchase/scripts/deploy.sh
+            bash /home/admin/bulkpurchase/scripts/deploy.sh

@@ -51,14 +51,14 @@
 
   <div class="flex flex-wrap gap-3 border-t border-stone-200 pt-6">
     <% unless readonly %>
-      <%= button_tag "保存", name: "commit_action", value: "save", class: "inline-flex rounded-xl border border-stone-300 px-5 py-3 text-lg font-medium text-stone-700 hover:bg-stone-100" %>
-      <%= button_tag "提出する", name: "commit_action", value: "submit", class: "inline-flex rounded-xl bg-stone-900 px-5 py-3 text-lg font-medium text-white hover:bg-stone-700" %>
+      <%= button_tag "保存", name: "commit_action", value: "save", class: "btn btn-secondary" %>
+      <%= button_tag "提出する", name: "commit_action", value: "submit", class: "btn btn-primary" %>
     <% end %>
     <% if order.persisted? %>
-      <%= link_to "注文詳細を見る", local_assigns.fetch(:detail_path, order_path(order)), class: "inline-flex rounded-xl border border-stone-300 px-5 py-3 text-lg font-medium text-stone-700 hover:bg-stone-100" %>
+      <%= link_to "注文詳細を見る", local_assigns.fetch(:detail_path, order_path(order)), class: "btn btn-secondary" %>
     <% end %>
     <% if back_path.present? %>
-      <%= link_to "一覧へ戻る", back_path, class: "inline-flex rounded-xl border border-stone-300 px-5 py-3 text-lg font-medium text-stone-700 hover:bg-stone-100" %>
+      <%= link_to "一覧へ戻る", back_path, class: "btn btn-secondary" %>
     <% end %>
   </div>
 <% end %>

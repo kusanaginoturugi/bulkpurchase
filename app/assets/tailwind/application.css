@@ -54,3 +54,22 @@
   /* gray: 個別ボーダー等で混入。stone と揃える */
   --color-gray-400: #9aa4bc;
 }
+
+/*
+ * 共通ボタンクラス。view から長い utility 連打を排除する。
+ * 名前は osystem/design/base.css の .primary-button / .secondary-link に寄せておく
+ * (将来 base.css へ合流するときの足場)。
+ */
+@layer components {
+  .btn {
+    @apply inline-flex items-center rounded-xl border px-5 py-3 text-lg font-medium;
+  }
+
+  .btn-secondary {
+    @apply border-stone-300 text-stone-700 hover:bg-stone-100;
+  }
+
+  .btn-primary {
+    @apply border-stone-900 bg-stone-900 text-white hover:border-stone-700 hover:bg-stone-700;
+  }
+}

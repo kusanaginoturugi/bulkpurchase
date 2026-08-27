@@ -147,7 +147,10 @@ export default class extends Controller {
       "灶君護摩符",
       "そう君護摩符",
       "灶君北斗七星護摩符",
-      "そう君北斗七星護摩符"
+      "そう君北斗七星護摩符",
+      "灶君北斗",
+      "そう君北斗",
+      "そう君"
     ].some((name) => normalized.includes(name))
   }
 

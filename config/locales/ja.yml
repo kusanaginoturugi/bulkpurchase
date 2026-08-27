@@ -9,6 +9,8 @@ ja:
       long: "%Y年%-m月%-d日 %H:%M"
   errors:
     format: "%{attribute}%{message}"
+    messages:
+      not_a_number: "は数値で入力してください"
   enums:
     order_cycle:
       status:
@@ -59,6 +61,7 @@ ja:
         taken: "はすでに使われています"
         confirmation: "が一致しません"
         invalid: "は正しく入力してください"
+        not_a_number: "は数値で入力してください"
         too_short: "は%{count}文字以上で入力してください"
         too_long: "は%{count}文字以内で入力してください"
         record_invalid: "入力内容を確認してください: %{errors}"

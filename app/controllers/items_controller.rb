@@ -46,7 +46,10 @@ class ItemsController < ApplicationController
       "灶君護摩符",
       "そう君護摩符",
       "灶君北斗七星護摩符",
-      "そう君北斗七星護摩符"
+      "そう君北斗七星護摩符",
+      "灶君北斗",
+      "そう君北斗",
+      "そう君"
     ].any? { |name| normalized.include?(name) }
   end
 end

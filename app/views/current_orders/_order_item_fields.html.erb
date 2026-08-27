@@ -13,6 +13,7 @@
   <div>
     <%= f.hidden_field :item_variant_id %>
     <%= f.text_field :variant_name, readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { item_autocomplete_target: "variantName" } %>
+    <%= select_tag nil, options_for_select([], order_item.variant_name), disabled: readonly, class: "hidden block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { action: "change->item-autocomplete#syncVariantSelect", item_autocomplete_target: "variantSelect" } %>
   </div>
 
   <div>

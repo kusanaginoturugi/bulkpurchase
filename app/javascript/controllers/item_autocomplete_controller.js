@@ -1,12 +1,13 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["query", "menu", "itemId", "itemCode", "itemName", "variantName", "unit"]
+  static targets = ["query", "menu", "itemId", "itemCode", "itemName", "variantName", "variantSelect", "unit"]
 
   connect() {
     if (this.variantNameTarget.value.trim() === "") {
       this.updateVariantPlaceholder(this.queryTarget.value.trim())
     }
+    this.updateVariantControl(this.queryTarget.value.trim())
   }
 
   syncQuery() {
@@ -24,8 +25,10 @@ export default class extends Controller {
     this.itemIdTarget.value = ""
     this.itemCodeTarget.value = ""
     this.itemNameTarget.value = query
+    this.variantNameTarget.value = ""
     this.unitTarget.value = ""
     this.updateVariantPlaceholder(query)
+    this.updateVariantControl(query)
   }
 
   search() {
@@ -54,7 +57,8 @@ export default class extends Controller {
       return
     }
 
-    const exactItem = items.find((item) => item.name === this.queryTarget.value.trim() || item.code === this.queryTarget.value.trim())
+    const query = this.queryTarget.value.trim()
+    const exactItem = items.find((item) => item.name === query || item.code === query || (this.isSoKunQuery(query) && item.code === "210001"))
     if (exactItem) this.applyItem(exactItem, { updateQuery: false })
 
     this.menuTarget.innerHTML = items.map((item) => {
@@ -75,13 +79,16 @@ export default class extends Controller {
 
   applyItem(item, options = {}) {
     const updateQuery = options.updateQuery ?? true
+    const previousItemId = this.itemIdTarget.value
 
     this.itemIdTarget.value = item.id
     this.itemCodeTarget.value = item.code
     this.itemNameTarget.value = item.name
+    if (previousItemId !== "" && previousItemId !== String(item.id)) this.variantNameTarget.value = ""
     if (updateQuery) this.queryTarget.value = item.name
     this.unitTarget.value = item.unit || ""
     this.updateVariantPlaceholder(item)
+    this.updateVariantControl(item)
   }
 
   updateVariantPlaceholder(itemOrQuery) {
@@ -96,12 +103,63 @@ export default class extends Controller {
     }
   }
 
+  syncVariantSelect() {
+    this.variantNameTarget.value = this.variantSelectTarget.value
+  }
+
+  updateVariantControl(itemOrQuery) {
+    const code = typeof itemOrQuery === "string" ? this.itemCodeTarget.value : itemOrQuery.code
+    const query = typeof itemOrQuery === "string" ? itemOrQuery : itemOrQuery.name
+    const options = this.variantOptionsFor(code, query)
+
+    if (options.length === 0) {
+      this.variantSelectTarget.classList.add("hidden")
+      this.variantSelectTarget.value = ""
+      this.variantNameTarget.classList.remove("hidden")
+      return
+    }
+
+    this.variantSelectTarget.innerHTML = [
+      "<option value=\"\">選択してください</option>",
+      ...options.map((option) => `<option value="${option}">${option}</option>`)
+    ].join("")
+    this.variantSelectTarget.value = options.includes(this.variantNameTarget.value) ? this.variantNameTarget.value : ""
+    this.variantNameTarget.classList.add("hidden")
+    this.variantSelectTarget.classList.remove("hidden")
+  }
+
+  variantOptionsFor(code, query) {
+    if (code === "210001" || this.isSoKunQuery(query)) {
+      return ["貪狼星", "巨文星", "禄存星", "文曲星", "廉貞星", "武曲星", "破軍星"]
+    }
+
+    if (code === "205002" || query.includes("四神獣符")) {
+      return ["玄武", "青龍", "白虎", "朱雀"]
+    }
+
+    return []
+  }
+
+  isSoKunQuery(query) {
+    const normalized = query.replaceAll("竈", "灶")
+
+    return [
+      "灶君護摩符",
+      "そう君護摩符",
+      "灶君北斗七星護摩符",
+      "そう君北斗七星護摩符"
+    ].some((name) => normalized.includes(name))
+  }
+
   clearItemFields() {
     this.itemIdTarget.value = ""
     this.itemCodeTarget.value = ""
     this.itemNameTarget.value = ""
     this.variantNameTarget.value = ""
     this.variantNameTarget.placeholder = ""
+    this.variantNameTarget.classList.remove("hidden")
+    this.variantSelectTarget.classList.add("hidden")
+    this.variantSelectTarget.value = ""
     this.unitTarget.value = ""
   }
 

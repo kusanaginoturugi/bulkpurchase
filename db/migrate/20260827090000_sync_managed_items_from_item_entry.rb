@@ -2,12 +2,15 @@
 
 require "csv"
 
-class ImportManagedItems < ActiveRecord::Migration[8.0]
+class SyncManagedItemsFromItemEntry < ActiveRecord::Migration[8.0]
   def up
+    codes = []
+
     CSV.foreach(Rails.root.join("items.csv"), headers: true) do |row|
       code = row.fetch("code")
       next unless code.between?("100400", "210008")
 
+      codes << code
       item = Item.find_or_initialize_by(code:)
       item.update!(
         name: row.fetch("name"),
@@ -20,11 +23,11 @@ class ImportManagedItems < ActiveRecord::Migration[8.0]
       )
     end
 
-    ensure_hakuyo_hakke_variants
+    Item.where(code: "100400".."210008").where.not(code: codes).update_all(active: false)
   end
 
   def down
-    # 道具は注文明細から参照されるため、自動削除しません。
+    # 外部道具一覧に合わせる同期のため、戻し処理は行いません。
   end
 
   private
@@ -36,17 +39,5 @@ class ImportManagedItems < ActiveRecord::Migration[8.0]
     return "枚" if %w[札 符 人型 銭型 金紙 銀紙 暦].any? { |keyword| name.include?(keyword) }
 
     "個"
-  end
-
-  def ensure_hakuyo_hakke_variants
-    hakke = Item.find_by(name: "白陽八卦符")
-    return unless hakke
-
-    %w[無地 有気復命].each_with_index do |name, index|
-      hakke.item_variants.find_or_create_by!(name:) do |variant|
-        variant.display_order = index
-        variant.active = true
-      end
-    end
   end
 end

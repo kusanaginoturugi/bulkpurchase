@@ -3,7 +3,8 @@
 require 'csv'
 
 def infer_unit(name)
-  return '組' if %w[白陽八卦符 みろく鵺符].any? { |keyword| name.include?(keyword) }
+  return '組' if name.include?('1組')
+  return '組' if %w[白陽八卦符 みろく鵺符 灶君護摩符 大國陰陽符].any? { |keyword| name.include?(keyword) }
   return '本' if %w[護摩木 御柱 棒].any? { |keyword| name.include?(keyword) }
   return '枚' if %w[札 符 人型 銭型 金紙 銀紙 暦].any? { |keyword| name.include?(keyword) }
 
@@ -55,7 +56,7 @@ sample_user.assign_attributes(
 sample_user.save!
 
 CSV.foreach(Rails.root.join('items.csv'), headers: true) do |row|
-  next unless row.fetch('code').start_with?('1', '2')
+  next unless row.fetch('code').between?('100400', '210008')
 
   item = Item.find_or_initialize_by(code: row.fetch('code'))
   item.assign_attributes(

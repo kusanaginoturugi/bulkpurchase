@@ -20,7 +20,7 @@ class Order < ApplicationRecord
   }, validate: true
 
   validates :orderer_name, :pickup_name, presence: true
-  validates :user_id, uniqueness: { scope: :order_cycle_id }
+  validates :fellowship_id, uniqueness: { scope: :order_cycle_id }
   validate :submitted_orders_must_have_items
 
   before_validation :sync_fellowship

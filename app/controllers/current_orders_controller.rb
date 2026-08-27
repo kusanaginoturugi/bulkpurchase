@@ -6,6 +6,7 @@ class CurrentOrdersController < ApplicationController
 
   def show
     @fellowships = Fellowship.active.order(:name)
+    @selected_fellowship = selected_fellowship
     build_blank_rows if @order.order_items.empty?
   end
 
@@ -25,11 +26,10 @@ class CurrentOrdersController < ApplicationController
 
   def set_order
     @order = if @order_cycle
-               current_user.orders
-                           .includes(order_items: %i[item item_variant])
-                           .find_or_initialize_by(order_cycle: @order_cycle)
-                           .tap do |order|
-                 order.fellowship ||= current_user.fellowship
+               Order.includes(order_items: %i[item item_variant])
+                    .find_or_initialize_by(order_cycle: @order_cycle, fellowship: selected_fellowship)
+                    .tap do |order|
+                 order.user ||= current_user
                  order.orderer_name ||= current_user.name
                end
     else
@@ -55,8 +55,8 @@ class CurrentOrdersController < ApplicationController
     end
 
     @order.assign_attributes(order_params)
-    @order.user = current_user
-    @order.fellowship = current_user.fellowship
+    @order.user ||= current_user
+    @order.fellowship = current_user.admin? ? selected_fellowship : current_user.fellowship
     @order.order_cycle = @order_cycle
 
     if params[:commit_action] == "submit"
@@ -70,15 +70,24 @@ class CurrentOrdersController < ApplicationController
       redirect_to current_order_path, notice: message
     else
       @fellowships = Fellowship.active.order(:name)
+      @selected_fellowship = selected_fellowship
       build_blank_rows(1) if @order.order_items.empty?
       render :show, status: :unprocessable_entity
     end
+  end
+
+  def selected_fellowship
+    return current_user.fellowship unless current_user.admin?
+
+    fellowship_id = params.dig(:order, :fellowship_id).presence || params[:fellowship_id].presence
+    Fellowship.active.find_by(id: fellowship_id) || current_user.fellowship
   end
 
   def order_params
     params.require(:order).permit(
       :orderer_name,
       :pickup_name,
+      :fellowship_id,
       order_items_attributes: %i[
         id item_id item_variant_id item_code item_name variant_name quantity unit notes sort_order _destroy
       ]

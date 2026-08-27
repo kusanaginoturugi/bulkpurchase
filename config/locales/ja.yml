@@ -65,3 +65,6 @@ ja:
         too_short: "は%{count}文字以上で入力してください"
         too_long: "は%{count}文字以内で入力してください"
         record_invalid: "入力内容を確認してください: %{errors}"
+        restrict_dependent_destroy:
+          has_one: "関連するデータがあるため削除できません"
+          has_many: "関連するデータがあるため削除できません"

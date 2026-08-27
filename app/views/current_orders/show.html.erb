@@ -37,6 +37,6 @@
       </div>
     <% end %>
 
-    <%= render "form", order: @order, form_url: current_order_path, fellowship_selectable: false, fellowships: @fellowships, back_path: nil %>
+    <%= render "form", order: @order, form_url: current_order_path(fellowship_id: @selected_fellowship&.id), fellowship_selectable: current_user.admin?, fellowships: @fellowships, back_path: nil %>
   </section>
 <% end %>

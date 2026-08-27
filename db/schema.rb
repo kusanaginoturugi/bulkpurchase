@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_27_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_27_133000) do
   create_table "fellowships", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.string "code"
@@ -89,9 +89,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_27_090000) do
     t.datetime "submitted_at"
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["fellowship_id", "order_cycle_id"], name: "index_orders_on_fellowship_id_and_order_cycle_id"
     t.index ["fellowship_id"], name: "index_orders_on_fellowship_id"
     t.index ["order_cycle_id"], name: "index_orders_on_order_cycle_id"
-    t.index ["user_id", "order_cycle_id"], name: "index_orders_on_user_id_and_order_cycle_id", unique: true
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
@@ -106,6 +106,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_27_090000) do
 
   create_table "users", force: :cascade do |t|
     t.boolean "active", default: true, null: false
+    t.text "authentik_groups"
+    t.string "authentik_subject"
     t.datetime "created_at", null: false
     t.string "email_address", null: false
     t.integer "fellowship_id", null: false
@@ -113,6 +115,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_27_090000) do
     t.string "password_digest", null: false
     t.string "role", default: "user", null: false
     t.datetime "updated_at", null: false
+    t.index ["authentik_subject"], name: "index_users_on_authentik_subject", unique: true
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["fellowship_id"], name: "index_users_on_fellowship_id"
   end

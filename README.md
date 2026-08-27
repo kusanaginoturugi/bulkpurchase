@@ -150,6 +150,35 @@ systemd 側は既存運用に合わせてください。
 RAILS_ENV=production bundle exec puma -C config/puma.rb
 ```
 
+## Authentik 連携
+
+本番では Authentik の OAuth2/OIDC プロバイダを使ってログインします。
+
+未設定の間だけ従来ログインを表示し、設定後は Authentik ログインのみになります。
+
+Rails 側に必要な環境変数:
+
+```bash
+AUTHENTIK_ISSUER=https://auth.showway.biz/application/o/bulkpurchase/
+AUTHENTIK_CLIENT_ID=bulkpurchase
+AUTHENTIK_CLIENT_SECRET=...
+AUTHENTIK_REDIRECT_URI=https://bulkpurchase.showway.biz/session/authentik/callback
+AUTHENTIK_REQUIRED_GROUP=myouou
+AUTHENTIK_ADMIN_NAMES=尾ノ上裕美
+```
+
+Authentik の管理APIトークンがある場合は、プロバイダとアプリを作成できます。
+
+```bash
+AUTHENTIK_API_TOKEN=... ruby scripts/create_authentik_app.rb
+```
+
+ログイン許可条件:
+
+- `myouou` グループに所属している
+- グループ名に伝道会名、伝道会番号、または「伝道会番号 伝道会名」がある
+- 氏名が `尾ノ上裕美` のユーザーは管理者として扱う
+
 ## 本番運用時の注意
 
 - SQLite を使うため、`storage/` の永続化が必要です

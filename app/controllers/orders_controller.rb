@@ -15,6 +15,6 @@ class OrdersController < ApplicationController
   private
 
   def scoped_orders
-    current_user.admin? ? Order.all : current_user.orders
+    current_user.admin? ? Order.all : Order.where(fellowship: current_user.fellowship)
   end
 end

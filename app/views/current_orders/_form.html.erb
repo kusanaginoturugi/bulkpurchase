@@ -10,7 +10,7 @@
     <div>
       <label class="text-lg font-medium text-stone-700">伝道会名</label>
       <% if fellowship_selectable %>
-        <%= form.collection_select :fellowship_id, fellowships, :id, :display_name, {}, disabled: readonly, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3 text-lg focus:border-amber-500 focus:bg-white focus:outline-none disabled:cursor-not-allowed disabled:bg-stone-100" %>
+        <%= form.collection_select :fellowship_id, fellowships, :id, :display_name, {}, disabled: readonly, onchange: "window.location.href='#{current_order_path}?fellowship_id=' + this.value", class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3 text-lg focus:border-amber-500 focus:bg-white focus:outline-none disabled:cursor-not-allowed disabled:bg-stone-100" %>
       <% else %>
         <div class="mt-2 rounded-xl border border-stone-200 bg-stone-100 px-4 py-3 text-lg text-stone-700"><%= order.fellowship&.display_name || current_user.fellowship.display_name %></div>
       <% end %>

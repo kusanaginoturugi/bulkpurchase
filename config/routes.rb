@@ -2,6 +2,7 @@
 
 Rails.application.routes.draw do
   resource :session, only: %i[new create destroy]
+  get "session/authentik/callback", to: "sessions#authentik"
   resources :passwords, only: %i[new create edit update], param: :token
   resource :current_order, only: %i[show create update], controller: :current_orders
   resources :orders, only: %i[index show]

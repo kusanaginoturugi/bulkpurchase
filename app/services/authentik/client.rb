@@ -39,13 +39,14 @@ module Authentik
         ensure_configured!
 
         tokens = request_token(code:, redirect_uri:)
-        profile = request_userinfo(tokens.fetch("access_token"))
         id_token_profile = decoded_id_token(tokens["id_token"])
         if id_token_profile.present?
           raise AuthenticationError, "ログイン情報の確認に失敗しました。もう一度ログインしてください。" if id_token_profile["nonce"].present? && id_token_profile["nonce"] != nonce
-
-          profile = id_token_profile.merge(profile)
         end
+
+        profile = decoded_id_token(tokens["access_token"]).merge(id_token_profile)
+        userinfo_profile = request_userinfo(tokens.fetch("access_token"))
+        profile = profile.merge(userinfo_profile)
 
         user_from_profile(profile)
       rescue KeyError, JSON::ParserError, Net::OpenTimeout, Net::ReadTimeout, SocketError => e
@@ -122,7 +123,7 @@ module Authentik
         request["Authorization"] = "Bearer #{access_token}"
 
         response = http(uri).request(request)
-        raise AuthenticationError, "Authentikのユーザー情報を取得できませんでした。" unless response.is_a?(Net::HTTPSuccess)
+        return {} unless response.is_a?(Net::HTTPSuccess)
 
         JSON.parse(response.body)
       end
@@ -147,7 +148,7 @@ module Authentik
       end
 
       def decoded_id_token(id_token)
-        _header, payload, = id_token.split(".")
+        _header, payload, = id_token.to_s.split(".")
         return {} if payload.blank?
 
         JSON.parse(Base64.urlsafe_decode64(payload.ljust((payload.length + 3) & ~3, "=")))

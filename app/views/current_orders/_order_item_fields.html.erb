@@ -21,7 +21,7 @@
   </div>
 
   <div>
-    <%= f.text_field :unit, readonly:, class: "block w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-lg focus:border-amber-500 focus:outline-none disabled:bg-stone-100", data: { item_autocomplete_target: "unit" } %>
+    <%= f.text_field :unit, readonly: true, tabindex: -1, class: "block w-full rounded-xl border border-stone-300 bg-stone-100 px-4 py-3 text-lg text-stone-700 focus:outline-none", data: { item_autocomplete_target: "unit" } %>
   </div>
 
   <%= f.hidden_field :sort_order %>

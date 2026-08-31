@@ -140,6 +140,8 @@ jobs:
       - test
       - system-test
     runs-on: ubuntu-latest
+    env:
+      AUTHENTIK_CLIENT_SECRET: ${{ secrets.AUTHENTIK_CLIENT_SECRET }}
 
     steps:
       - name: Deploy to production server
@@ -149,6 +151,7 @@ jobs:
           port: ${{ secrets.EC2_PORT }}
           username: admin
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: AUTHENTIK_CLIENT_SECRET
           script: |
             cd /home/admin/bulkpurchase
             git config core.fileMode false

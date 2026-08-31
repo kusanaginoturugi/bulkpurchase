@@ -6,21 +6,14 @@ class SessionsController < ApplicationController
     redirect_to new_session_url, alert: "時間をおいてもう一度お試しください。"
   }
 
-  def new; end
+  def new
+    return if flash[:alert].present? || !Authentik::Client.configured?
+
+    begin_authentik_login
+  end
 
   def create
-    state = SecureRandom.hex(24)
-    nonce = SecureRandom.hex(24)
-    session[:authentik_state] = state
-    session[:authentik_nonce] = nonce
-
-    redirect_to Authentik::Client.authorization_url(
-      redirect_uri: authentik_callback_url,
-      state: state,
-      nonce: nonce
-    ), allow_other_host: true
-  rescue Authentik::ConfigurationError => e
-    redirect_to new_session_path, alert: e.message
+    begin_authentik_login
   end
 
   def authentik
@@ -52,6 +45,21 @@ class SessionsController < ApplicationController
   end
 
   private
+
+  def begin_authentik_login
+    state = SecureRandom.hex(24)
+    nonce = SecureRandom.hex(24)
+    session[:authentik_state] = state
+    session[:authentik_nonce] = nonce
+
+    redirect_to Authentik::Client.authorization_url(
+      redirect_uri: authentik_callback_url,
+      state: state,
+      nonce: nonce
+    ), allow_other_host: true
+  rescue Authentik::ConfigurationError => e
+    redirect_to new_session_path, alert: e.message
+  end
 
   def authentik_callback_url
     ENV.fetch("AUTHENTIK_REDIRECT_URI") { "#{request.base_url}#{Authentik::Client.callback_path}" }

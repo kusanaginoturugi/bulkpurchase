@@ -22,7 +22,7 @@ class OrderItem < ApplicationRecord
 
     self.item_code = item.code
     self.item_name = item.name if item_name.blank?
-    self.unit = item.unit if unit.blank?
+    self.unit = item.unit
 
     return unless item_variant
 

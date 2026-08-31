@@ -154,7 +154,7 @@ RAILS_ENV=production bundle exec puma -C config/puma.rb
 
 本番では Authentik の OAuth2/OIDC プロバイダを使ってログインします。
 
-未設定の間だけ従来ログインを表示し、設定後は Authentik ログインのみになります。
+従来のメールアドレス/パスワードログインは使わず、Authentik ログインのみを表示します。
 
 Rails 側に必要な環境変数:
 

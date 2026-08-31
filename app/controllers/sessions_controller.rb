@@ -9,11 +9,6 @@ class SessionsController < ApplicationController
   def new; end
 
   def create
-    unless Authentik::Client.configured?
-      password_login
-      return
-    end
-
     state = SecureRandom.hex(24)
     nonce = SecureRandom.hex(24)
     session[:authentik_state] = state
@@ -57,15 +52,6 @@ class SessionsController < ApplicationController
   end
 
   private
-
-  def password_login
-    if (user = User.authenticate_by(params.permit(:email_address, :password)))
-      start_new_session_for user
-      redirect_to after_authentication_url
-    else
-      redirect_to new_session_path, alert: "メールアドレスまたはパスワードを確認してください。"
-    end
-  end
 
   def authentik_callback_url
     ENV.fetch("AUTHENTIK_REDIRECT_URI") { "#{request.base_url}#{Authentik::Client.callback_path}" }

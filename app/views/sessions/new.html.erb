@@ -5,25 +5,11 @@
     <p class="mt-2 text-sm text-stone-500">Authentikのアカウントでログインしてください。</p>
   </div>
 
-  <% if Authentik::Client.configured? %>
-    <%= button_to "Authentikでログイン", session_url, method: :post, class: "w-full justify-center rounded-xl bg-stone-900 px-5 py-3 text-sm font-medium text-white hover:bg-stone-700" %>
-  <% else %>
-    <div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-      Authentikの接続設定が未設定のため、従来のログインを表示しています。
-    </div>
+  <%= button_to "Authentikでログイン", session_url, method: :post, class: "w-full justify-center rounded-xl bg-stone-900 px-5 py-3 text-sm font-medium text-white hover:bg-stone-700" %>
 
-    <%= form_with url: session_url, class: "space-y-5" do |form| %>
-      <div>
-        <%= form.label :email_address, "メールアドレス", class: "text-sm font-medium text-stone-700" %>
-        <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", value: params[:email_address], class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3 focus:border-amber-500 focus:bg-white focus:outline-none" %>
-      </div>
-
-      <div>
-        <%= form.label :password, "パスワード", class: "text-sm font-medium text-stone-700" %>
-        <%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3 focus:border-amber-500 focus:bg-white focus:outline-none" %>
-      </div>
-
-      <%= form.submit "ログイン", class: "w-full rounded-xl bg-stone-900 px-5 py-3 text-sm font-medium text-white hover:bg-stone-700" %>
-    <% end %>
+  <% unless Authentik::Client.configured? %>
+    <p class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+      Authentikの接続設定が未設定です。
+    </p>
   <% end %>
 </div>

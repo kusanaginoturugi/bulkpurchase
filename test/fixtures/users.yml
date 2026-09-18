@@ -2,8 +2,14 @@
 
 one:
   email_address: one@example.com
+  name: テスト利用者1
+  fellowship: one
+  role: user
   password_digest: <%= password_digest %>
 
 two:
   email_address: two@example.com
+  name: テスト利用者2
+  fellowship: two
+  role: user
   password_digest: <%= password_digest %>

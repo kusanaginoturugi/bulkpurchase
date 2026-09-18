@@ -1,14 +1,26 @@
 development:
+  tendo_submission:
+    class: TendoSubmissionJob
+    schedule: every minute
+
   daily_order_check:
     class: DailyOrderCheckJob
     schedule: every day at midnight
 
 test:
+  tendo_submission:
+    class: TendoSubmissionJob
+    schedule: every minute
+
   daily_order_check:
     class: DailyOrderCheckJob
     schedule: every day at midnight
 
 production:
+  tendo_submission:
+    class: TendoSubmissionJob
+    schedule: every minute
+
   daily_order_check:
     class: DailyOrderCheckJob
     schedule: every day at midnight

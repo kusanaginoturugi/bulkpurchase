@@ -11,8 +11,8 @@ one:
 
 two:
   year: 1
-  month: 1
-  cycle_number: 1
+  month: 2
+  cycle_number: 2
   deadline_at: 2026-04-13 23:15:32
   order_date: 2026-04-13
   arrival_date: 2026-04-13

@@ -7,6 +7,7 @@
         <tr>
           <th class="py-3">対象月</th>
           <th class="py-3">締切</th>
+          <th class="py-3">PDF自動送信</th>
           <th class="py-3">状態</th>
           <th class="py-3"></th>
         </tr>
@@ -16,6 +17,7 @@
           <tr>
             <td class="py-3"><%= order_cycle.label %></td>
             <td class="py-3"><%= l(order_cycle.deadline_at, format: :long) %></td>
+            <td class="py-3"><%= order_cycle.tendo_submission_status_label %></td>
             <td class="py-3"><%= order_cycle.status_label %></td>
             <td class="py-3 text-right">
               <%= link_to "詳細", admin_order_cycle_path(order_cycle), class: "mr-3 font-medium text-stone-900" %>

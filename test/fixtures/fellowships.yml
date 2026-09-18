@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  code: "31101"
+  name: 埼玉
+  active: true
+  enabled: true
+
+two:
+  code: "31201"
+  name: 千葉
+  active: true
+  enabled: true

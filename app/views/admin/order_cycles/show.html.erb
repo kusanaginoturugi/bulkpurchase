@@ -4,7 +4,7 @@
 </div>
 
 <section class="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm">
-  <div class="grid gap-4 md:grid-cols-3">
+  <div class="grid gap-4 md:grid-cols-4">
     <div class="rounded-2xl bg-stone-50 p-4">
       <p class="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">締切</p>
       <p class="mt-2 font-medium text-stone-900"><%= l(@order_cycle.deadline_at, format: :long) %></p>
@@ -17,7 +17,18 @@
       <p class="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">必着日</p>
       <p class="mt-2 font-medium text-stone-900"><%= l(@order_cycle.arrival_date) %></p>
     </div>
+    <div class="rounded-2xl bg-stone-50 p-4">
+      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">PDF自動送信</p>
+      <p class="mt-2 font-medium text-stone-900"><%= @order_cycle.tendo_submission_status_label %></p>
+      <% if @order_cycle.tendo_destination_label.present? %>
+        <p class="mt-1 text-sm text-stone-600"><%= @order_cycle.tendo_destination_label %></p>
+      <% end %>
+    </div>
   </div>
+
+  <% if @order_cycle.tendo_send_error.present? %>
+    <p class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">PDF自動送信エラー: <%= @order_cycle.tendo_send_error %></p>
+  <% end %>
 
   <div class="mt-6 overflow-hidden rounded-3xl border border-stone-200">
     <table class="min-w-full divide-y divide-stone-200 text-sm">

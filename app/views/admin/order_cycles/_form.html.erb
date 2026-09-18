@@ -11,6 +11,16 @@
   </div>
   <div class="grid gap-4 md:grid-cols-2">
     <div>
+      <%= form.label :tendo_send_at, "PDF自動送信日時", class: "text-sm font-medium text-stone-700" %>
+      <%= form.datetime_local_field :tendo_send_at, value: order_cycle.tendo_send_at&.strftime("%Y-%m-%dT%H:%M"), class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
+    </div>
+    <div>
+      <%= form.label :tendo_destination, "PDF送信先", class: "text-sm font-medium text-stone-700" %>
+      <%= form.select :tendo_destination, OrderCycle.tendo_destination_options, { include_blank: "送信しない" }, class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3" %>
+    </div>
+  </div>
+  <div class="grid gap-4 md:grid-cols-2">
+    <div>
       <%= form.label :deadline_at, "締切日時", class: "text-sm font-medium text-stone-700" %>
       <%= form.datetime_local_field :deadline_at, value: order_cycle.deadline_at&.strftime("%Y-%m-%dT%H:%M"), class: "mt-2 block w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3", data: { order_cycle_form_target: "deadlineAt" } %>
     </div>

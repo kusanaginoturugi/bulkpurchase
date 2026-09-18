@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_27_133000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_18_102000) do
   create_table "fellowships", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.string "code"
@@ -56,6 +56,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_27_133000) do
     t.integer "month", null: false
     t.date "order_date", null: false
     t.string "status", default: "open", null: false
+    t.string "tendo_destination"
+    t.datetime "tendo_send_at"
+    t.text "tendo_send_error"
+    t.datetime "tendo_sent_at"
     t.datetime "updated_at", null: false
     t.integer "year", null: false
     t.index ["year", "month"], name: "index_order_cycles_on_year_and_month", unique: true
@@ -89,7 +93,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_27_133000) do
     t.datetime "submitted_at"
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
-    t.index ["fellowship_id", "order_cycle_id"], name: "index_orders_on_fellowship_id_and_order_cycle_id"
+    t.index ["fellowship_id", "order_cycle_id"], name: "index_orders_on_fellowship_id_and_order_cycle_id", unique: true
     t.index ["fellowship_id"], name: "index_orders_on_fellowship_id"
     t.index ["order_cycle_id"], name: "index_orders_on_order_cycle_id"
     t.index ["user_id"], name: "index_orders_on_user_id"

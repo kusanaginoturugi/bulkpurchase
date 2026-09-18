@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_18_102000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_18_111000) do
   create_table "fellowships", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.string "code"

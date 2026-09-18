@@ -8,7 +8,7 @@ export default class extends Controller {
     7: { deadlineAt: "2026-06-28T23:59", arrivalDate: "2026-07-11" },
     8: { deadlineAt: "2026-07-26T23:59", arrivalDate: "2026-08-08" },
     9: { deadlineAt: "2026-08-30T23:59", arrivalDate: "2026-09-12" },
-    10: { deadlineAt: "2026-09-27T23:59", arrivalDate: "2026-10-11" },
+    10: { deadlineAt: "2026-09-27T23:59", arrivalDate: "2026-10-10" },
     11: { deadlineAt: "2026-10-25T23:59", arrivalDate: "2026-11-07" },
     12: { deadlineAt: "2026-11-29T23:59", arrivalDate: "2026-12-12" }
   }

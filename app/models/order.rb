@@ -19,7 +19,8 @@ class Order < ApplicationRecord
     submitted: "submitted"
   }, validate: true
 
-  validates :orderer_name, :pickup_name, presence: true
+  validates :orderer_name, presence: true
+  validates :pickup_name, presence: true, unless: :auto_generated?
   validates :fellowship_id, uniqueness: { scope: :order_cycle_id }
   validate :submitted_orders_must_have_items
 

@@ -25,6 +25,7 @@ module Admin
       @order_cycle = OrderCycle.new(order_cycle_params)
 
       if @order_cycle.save
+        MyououinRegularOrder.register(@order_cycle)
         redirect_to admin_order_cycles_path, notice: "注文サイクルを登録しました。"
       else
         @order_cycles = OrderCycle.recent_first
@@ -36,6 +37,7 @@ module Admin
 
     def update
       if @order_cycle.update(order_cycle_params)
+        MyououinRegularOrder.register(@order_cycle)
         redirect_to admin_order_cycles_path, notice: "注文サイクルを更新しました。"
       else
         render :edit, status: :unprocessable_entity

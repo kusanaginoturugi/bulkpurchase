@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_18_111000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_18_123000) do
   create_table "fellowships", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.string "code"
@@ -84,6 +84,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_18_111000) do
   end
 
   create_table "orders", force: :cascade do |t|
+    t.boolean "auto_generated", default: false, null: false
     t.datetime "created_at", null: false
     t.integer "fellowship_id", null: false
     t.integer "order_cycle_id", null: false

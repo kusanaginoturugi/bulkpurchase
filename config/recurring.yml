@@ -1,4 +1,8 @@
 development:
+  myououin_regular_order:
+    class: MyououinRegularOrderJob
+    schedule: every day at midnight
+
   tendo_submission:
     class: TendoSubmissionJob
     schedule: every minute
@@ -8,6 +12,10 @@ development:
     schedule: every day at midnight
 
 test:
+  myououin_regular_order:
+    class: MyououinRegularOrderJob
+    schedule: every day at midnight
+
   tendo_submission:
     class: TendoSubmissionJob
     schedule: every minute
@@ -17,6 +25,10 @@ test:
     schedule: every day at midnight
 
 production:
+  myououin_regular_order:
+    class: MyououinRegularOrderJob
+    schedule: every day at midnight
+
   tendo_submission:
     class: TendoSubmissionJob
     schedule: every minute

@@ -25,6 +25,7 @@ Environment="AUTHENTIK_CLIENT_SECRET=${AUTHENTIK_CLIENT_SECRET}"
 Environment="AUTHENTIK_REDIRECT_URI=https://bulkpurchase.showway.biz/session/authentik/callback"
 Environment="AUTHENTIK_REQUIRED_GROUP=myouou"
 Environment="AUTHENTIK_ADMIN_NAMES=尾ノ上裕美"
+Environment="AUTHENTIK_ADMIN_USERNAMES=myouou"
 EOF
   sudo -n /usr/bin/systemctl daemon-reload
 fi

@@ -14,6 +14,7 @@ module Authentik
     DEFAULT_ISSUER = "https://auth.showway.biz/application/o/bulkpurchase/"
     REQUIRED_GROUP = "myouou"
     DEFAULT_ADMIN_NAMES = [ "尾ノ上裕美" ].freeze
+    DEFAULT_ADMIN_USERNAMES = [ "myouou" ].freeze
 
     class << self
       def configured?
@@ -193,7 +194,9 @@ module Authentik
       end
 
       def admin?(profile, name)
-        admin_names.include?(name.to_s) || admin_emails.include?(profile["email"].to_s.downcase)
+        admin_names.include?(name.to_s) ||
+          admin_emails.include?(profile["email"].to_s.downcase) ||
+          admin_usernames.include?(profile["preferred_username"].to_s)
       end
 
       def admin_names
@@ -202,6 +205,10 @@ module Authentik
 
       def admin_emails
         ENV.fetch("AUTHENTIK_ADMIN_EMAILS", "").split(",").map { |email| email.strip.downcase }.reject(&:blank?)
+      end
+
+      def admin_usernames
+        ENV.fetch("AUTHENTIK_ADMIN_USERNAMES", DEFAULT_ADMIN_USERNAMES.join(",")).split(",").map(&:strip)
       end
 
       def normalize(value)

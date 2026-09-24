@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_18_123000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_24_100000) do
   create_table "fellowships", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.string "code"
@@ -57,6 +57,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_18_123000) do
     t.date "order_date", null: false
     t.string "status", default: "open", null: false
     t.string "tendo_destination"
+    t.datetime "tendo_email_sent_at"
     t.datetime "tendo_send_at"
     t.text "tendo_send_error"
     t.datetime "tendo_sent_at"

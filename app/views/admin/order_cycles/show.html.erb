@@ -23,6 +23,9 @@
       <% if @order_cycle.tendo_destination_label.present? %>
         <p class="mt-1 text-sm text-stone-600"><%= @order_cycle.tendo_destination_label %></p>
       <% end %>
+      <% if @order_cycle.tendo_email_sent_at.present? %>
+        <p class="mt-1 text-sm text-stone-600">メール送信済み: <%= l(@order_cycle.tendo_email_sent_at, format: :long) %></p>
+      <% end %>
     </div>
   </div>
 

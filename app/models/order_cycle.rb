@@ -22,6 +22,7 @@ class OrderCycle < ApplicationRecord
   scope :editable_by_users, -> { where.not(status: "sent").recent_first }
   scope :upcoming_for_users, -> { where.not(status: "sent").where(deadline_at: Time.current..).order(:deadline_at) }
   scope :ready_for_tendo_submission, -> { where.not(tendo_send_at: nil).where(tendo_sent_at: nil).where(tendo_send_at: ..Time.current) }
+  scope :ready_for_tendo_notification, -> { where.not(tendo_sent_at: nil).where(tendo_email_sent_at: nil) }
 
   def label
     format("%<year>d年%<month>02d月", year:, month:)
@@ -47,6 +48,7 @@ class OrderCycle < ApplicationRecord
   end
 
   def tendo_submission_status_label
+    return "PDF送信済み・メール送信待ち" if tendo_sent_at.present? && tendo_email_sent_at.blank?
     return "送信済み（#{I18n.l(tendo_sent_at, format: :long)}）" if tendo_sent_at.present?
     return "未設定" if tendo_send_at.blank?
     return "送信失敗" if tendo_send_error.present?

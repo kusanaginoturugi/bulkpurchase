@@ -16,4 +16,10 @@ class OrderMailer < ApplicationMailer
     attachments["order_summary_#{order_cycle.year}_#{order_cycle.month}.pdf"] = OrderSheetPdf.new(order_cycle).render
     mail(to: recipients, subject: "【聖明王院】#{order_cycle.label} 集計表")
   end
+
+  def tendo_submission(order_cycle, recipient)
+    @order_cycle = order_cycle
+    attachments["order_summary_#{order_cycle.year}_#{order_cycle.month}.pdf"] = OrderSheetPdf.new(order_cycle).render
+    mail(to: recipient, subject: "【聖明王院】#{order_cycle.label} PDF自動送信完了")
+  end
 end

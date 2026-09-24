@@ -51,7 +51,7 @@ module Admin
     end
 
     def order_cycle_params
-      params.require(:order_cycle).permit(:year, :month, :deadline_at, :arrival_date, :status, :tendo_send_at, :tendo_destination)
+      params.require(:order_cycle).permit(:year, :month, :deadline_at, :arrival_date, :status, :tendo_send_at)
     end
   end
 end

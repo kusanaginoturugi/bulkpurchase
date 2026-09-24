@@ -11,11 +11,11 @@ class TendoPdfUploaderTest < ActiveSupport::TestCase
       deadline_at: Time.zone.local(2030, 4, 1, 12),
       order_date: Date.new(2030, 4, 2),
       arrival_date: Date.new(2030, 4, 10),
-      tendo_destination: "kannondo"
+      tendo_destination: "mirokuji"
     )
     body = TendoPdfUploader.new(order_cycle).send(:multipart_body, "test-boundary")
 
-    assert_includes body, 'name="kannondo"'
+    assert_includes body, 'name="mirokuji"'
     assert_includes body, 'name="up_file[]"'
     assert_includes body, "Content-Type: application/pdf"
     assert_includes body, "%PDF"

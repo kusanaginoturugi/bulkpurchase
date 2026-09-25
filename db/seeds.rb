@@ -33,10 +33,6 @@ fellowships = fellowship_codes.each_with_object({}) do |(name, code), result|
   end
 end
 
-internal_fellowship = Fellowship.find_or_initialize_by(name: '聖明王院')
-internal_fellowship.assign_attributes(code: '99300', active: false, enabled: false)
-internal_fellowship.save!
-
 admin = User.find_or_initialize_by(email_address: 'admin@example.com')
 admin.assign_attributes(
   name: '管理者',

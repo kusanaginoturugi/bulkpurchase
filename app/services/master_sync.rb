@@ -23,7 +23,7 @@ class MasterSync
 
     ActiveRecord::Base.transaction do
       rows.filter { |row| Fellowship::MANAGED_FELLOWSHIPS.key?(row["code"].to_s) }.each { |row| upsert(row) }
-      Fellowship.where.not(code: Fellowship::MANAGED_FELLOWSHIPS.keys).update_all(active: false, enabled: false)
+      Fellowship.outside_managed_fellowships.update_all(active: false, enabled: false)
     end
 
     Result.new(count: Fellowship::MANAGED_FELLOWSHIPS.size, master_updated_at: body["updated_at"])

@@ -10,7 +10,7 @@ class LimitUserFellowshipsToNine < ActiveRecord::Migration[8.1]
       fellowship.save!
     end
 
-    Fellowship.where.not(code: FELLOWSHIPS.keys).update_all(active: false, enabled: false)
+    Fellowship.where.not(code: FELLOWSHIPS.keys).or(Fellowship.where(code: nil)).update_all(active: false, enabled: false)
   end
 
   def down

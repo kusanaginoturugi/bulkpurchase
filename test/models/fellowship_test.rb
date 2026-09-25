@@ -7,7 +7,9 @@ class FellowshipTest < ActiveSupport::TestCase
     inactive = fellowships(:two)
     inactive.update!(active: false)
     Fellowship.create!(code: "99300", name: "聖明王院", active: true, enabled: true)
+    Fellowship.create!(code: nil, name: "大仏殿", active: true, enabled: true)
 
     assert_equal [ fellowships(:one) ], Fellowship.available_to_users.order(:code).to_a
+    assert_equal [ nil, "99300" ], Fellowship.outside_managed_fellowships.order(:code).pluck(:code)
   end
 end

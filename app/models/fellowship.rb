@@ -21,6 +21,9 @@ class Fellowship < ApplicationRecord
 
   scope :active, -> { where(active: true) }
   scope :available_to_users, -> { active.where(code: MANAGED_FELLOWSHIPS.keys) }
+  scope :outside_managed_fellowships, -> {
+    where.not(code: MANAGED_FELLOWSHIPS.keys).or(where(code: nil))
+  }
 
   def display_name
     [ code.presence, name ].compact.join(" ")

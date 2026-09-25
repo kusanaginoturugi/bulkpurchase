@@ -22,10 +22,11 @@ class MasterSync
     rows = body.fetch("data")
 
     ActiveRecord::Base.transaction do
-      rows.each { |row| upsert(row) }
+      rows.filter { |row| Fellowship::MANAGED_FELLOWSHIPS.key?(row["code"].to_s) }.each { |row| upsert(row) }
+      Fellowship.where.not(code: Fellowship::MANAGED_FELLOWSHIPS.keys).update_all(active: false, enabled: false)
     end
 
-    Result.new(count: rows.size, master_updated_at: body["updated_at"])
+    Result.new(count: Fellowship::MANAGED_FELLOWSHIPS.size, master_updated_at: body["updated_at"])
   end
 
   private
@@ -40,13 +41,13 @@ class MasterSync
     JSON.parse(response.body)
   end
 
-  # enabled は同期で触らない (運用側のフラグ)。
-  # name は bulkpurchase の表示で短名を使いたいので short_name を優先する。
+  # 注文システムで利用する9伝道会だけを同期する。
   def upsert(row)
-    fellowship = Fellowship.find_or_initialize_by(id: row.fetch("id"))
-    fellowship.code = row["code"]
-    fellowship.name = row["short_name"].presence || row["name"]
-    fellowship.active = row["active"].to_i == 1
+    code = row.fetch("code").to_s
+    fellowship = Fellowship.find_or_initialize_by(code: code)
+    fellowship.name = Fellowship::MANAGED_FELLOWSHIPS.fetch(code)
+    fellowship.active = true
+    fellowship.enabled = true
     fellowship.save!
   end
 end

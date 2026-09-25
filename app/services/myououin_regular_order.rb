@@ -19,7 +19,7 @@ class MyououinRegularOrder
   def register
     return unless MONTHS.include?(@order_cycle.month)
 
-    fellowship = Fellowship.active.find_by!(name: FELLOWSHIP_NAME)
+    fellowship = Fellowship.find_by!(name: FELLOWSHIP_NAME)
     order = Order.find_or_initialize_by(order_cycle: @order_cycle, fellowship: fellowship)
     return if order.persisted? && !order.auto_generated?
 

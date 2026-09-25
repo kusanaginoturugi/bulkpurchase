@@ -186,7 +186,7 @@ module Authentik
 
       def fellowship_from_groups(groups)
         normalized_groups = groups.index_by { |group| normalize(group) }
-        Fellowship.active.find_each.find do |fellowship|
+        Fellowship.available_to_users.find_each.find do |fellowship|
           normalized_groups.key?(normalize(fellowship.name)) ||
             normalized_groups.key?(normalize(fellowship.display_name)) ||
             normalized_groups.key?(normalize(fellowship.code))

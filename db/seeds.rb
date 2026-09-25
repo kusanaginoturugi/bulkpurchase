@@ -20,18 +20,22 @@ fellowship_codes = {
   'かながわ' => '31407',
   '山梨' => '31901',
   '富士山' => '32204',
-  '駿天' => '32205',
-  '聖明王院' => '99300'
+  '駿天' => '32205'
 }
 
 fellowships = fellowship_codes.each_with_object({}) do |(name, code), result|
   Fellowship.find_or_initialize_by(name:).tap do |fellowship|
     fellowship.code = code
     fellowship.active = true
+    fellowship.enabled = true
     fellowship.save!
     result[name] = fellowship
   end
 end
+
+internal_fellowship = Fellowship.find_or_initialize_by(name: '聖明王院')
+internal_fellowship.assign_attributes(code: '99300', active: false, enabled: false)
+internal_fellowship.save!
 
 admin = User.find_or_initialize_by(email_address: 'admin@example.com')
 admin.assign_attributes(

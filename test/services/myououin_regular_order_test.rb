@@ -4,7 +4,7 @@ require "test_helper"
 
 class MyououinRegularOrderTest < ActiveSupport::TestCase
   test "2月の注文サイクルへ聖明王院の定期注文を登録する" do
-    fellowship = Fellowship.create!(code: "99300", name: "聖明王院", active: true, enabled: true)
+    fellowship = Fellowship.create!(code: "99300", name: "聖明王院", active: false, enabled: false)
     order_cycle = OrderCycle.create!(
       year: 2031,
       month: 2,

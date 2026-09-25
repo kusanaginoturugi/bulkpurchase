@@ -5,8 +5,7 @@ module Admin
     before_action :set_fellowship, only: %i[edit update destroy]
 
     def index
-      @fellowships = Fellowship.where(enabled: true).order(:code, :name)
-      @all_fellowships = Fellowship.order(:code, :name)
+      @fellowships = Fellowship.available_to_users.order(:code, :name)
     end
 
     def edit; end
@@ -37,7 +36,7 @@ module Admin
     def bulk_update_enabled
       enabled_ids = Array(params[:enabled]).map(&:to_i).to_set
       Fellowship.transaction do
-        Fellowship.find_each do |fellowship|
+        Fellowship.available_to_users.find_each do |fellowship|
           want = enabled_ids.include?(fellowship.id)
           fellowship.update!(enabled: want) if fellowship.enabled != want
         end

@@ -45,7 +45,7 @@ module Admin
     end
 
     def load_fellowships
-      @fellowships = Fellowship.active.order(:name)
+      @fellowships = Fellowship.available_to_users.order(:code)
     end
 
     def build_blank_rows(count = 1)

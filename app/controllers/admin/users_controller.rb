@@ -52,7 +52,7 @@ module Admin
     end
 
     def load_fellowships
-      @fellowships = Fellowship.active.order(:name)
+      @fellowships = Fellowship.available_to_users.order(:code)
     end
 
     def user_params

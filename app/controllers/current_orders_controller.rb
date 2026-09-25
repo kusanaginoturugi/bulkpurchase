@@ -5,7 +5,7 @@ class CurrentOrdersController < ApplicationController
   before_action :set_order
 
   def show
-    @fellowships = Fellowship.active.order(:name)
+    @fellowships = Fellowship.available_to_users.order(:code)
     @selected_fellowship = selected_fellowship
     build_blank_rows if @order.order_items.empty?
   end
@@ -69,7 +69,7 @@ class CurrentOrdersController < ApplicationController
       message = params[:commit_action] == "submit" ? "注文を提出しました。" : "注文を保存しました。"
       redirect_to current_order_path, notice: message
     else
-      @fellowships = Fellowship.active.order(:name)
+      @fellowships = Fellowship.available_to_users.order(:code)
       @selected_fellowship = selected_fellowship
       build_blank_rows(1) if @order.order_items.empty?
       render :show, status: :unprocessable_entity
@@ -80,7 +80,7 @@ class CurrentOrdersController < ApplicationController
     return current_user.fellowship unless current_user.admin?
 
     fellowship_id = params.dig(:order, :fellowship_id).presence || params[:fellowship_id].presence
-    Fellowship.active.find_by(id: fellowship_id) || current_user.fellowship
+    Fellowship.available_to_users.find_by(id: fellowship_id) || current_user.fellowship
   end
 
   def order_params

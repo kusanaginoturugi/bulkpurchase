@@ -437,7 +437,7 @@ async function sendNotificationEmail(env: Env, cycleId: number) {
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: env.RESEND_FROM, to: [env.TENDO_NOTIFICATION_EMAIL], subject: `${label} 道具一括注文書`, html: `<p>${label}の道具一括注文書を添付します。</p>`, attachments: [{ filename: "一括道具注文書.pdf", content: toBase64(new Uint8Array(bytes)) }] })
+    body: JSON.stringify({ from: env.RESEND_FROM, to: [env.TENDO_NOTIFICATION_EMAIL], subject: `【一括注文】${label}分`, html: `<p>${label}の道具一括注文書を添付します。</p>`, attachments: [{ filename: "一括道具注文書.pdf", content: toBase64(new Uint8Array(bytes)) }] })
   });
   if (!response.ok) throw new Error(`通知メールの送信に失敗しました（HTTP ${response.status}）`);
   await env.DB.prepare("UPDATE order_cycles SET tendo_email_sent_at=?, tendo_send_error=NULL, updated_at=? WHERE id=?").bind(now(), now(), cycleId).run();

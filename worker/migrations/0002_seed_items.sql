@@ -6,8 +6,8 @@ INSERT INTO items (code, name, value, refund, unit, special_handling_type, activ
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("101002", "地護摩木", 100, 40, "本", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("102000", "収天･灶君護摩木", 200, 100, "本", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("105001", "三會龍華之御柱", 500, 50, "本", "none", 1);
-INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("105002", "三會以外のHP", 500, 0, "個", "none", 1);
-INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("108000", "三期滅劫之霊木", 800, 100, "個", "none", 1);
+INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("105002", "三會以外のHP", 500, 0, "枚", "none", 1);
+INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("108000", "三期滅劫之霊木", 800, 100, "枚", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("120001", "三界平定･有気之御柱", 2000, 300, "本", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("120002", "八大明王如意棒", 2000, 800, "本", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("130001", "龍樹滅業棒", 3000, 1200, "本", "none", 1);
@@ -15,7 +15,7 @@ INSERT INTO items (code, name, value, refund, unit, special_handling_type, activ
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("200051", "免罪符", 5, 0, "枚", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("200052", "陰陽融合符", 5, 0, "枚", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("200053", "財罪浄化開放符", 5, 0, "枚", "none", 1);
-INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("200054", "大光明旗", 5, 0, "個", "none", 1);
+INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("200054", "大光明旗", 5, 0, "枚", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("200055", "大光明神殿符", 5, 0, "枚", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("200056", "よみかきそろばん符(こども)", 5, 0, "枚", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("200101", "大光明獅子符", 10, 0, "枚", "none", 1);
@@ -32,7 +32,7 @@ INSERT INTO items (code, name, value, refund, unit, special_handling_type, activ
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("200302", "星塔日月符", 30, 0, "枚", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("200501", "悠神導霊符", 50, 0, "枚", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("200502", "四生因縁護摩符", 50, 0, "枚", "none", 1);
-INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("200503", "宝剣", 50, 0, "個", "none", 1);
+INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("200503", "宝剣", 50, 0, "枚", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("200504", "天地免劫護摩符", 50, 0, "枚", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("201001", "白陽収円符", 100, 0, "枚", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("201002", "白陽八卦符", 100, 0, "組", "hakuyo_hakke", 1);

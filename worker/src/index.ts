@@ -332,6 +332,22 @@ app.post("/api/admin/cycles", async (c) => {
   } catch (error) { return jsonError(error instanceof Error ? error.message : "注文サイクルを登録できませんでした。", 422); }
 });
 
+app.put("/api/admin/cycles/:id", async (c) => {
+  try {
+    requireAdmin(c); requireCsrf(c);
+    const body = await c.req.json<Record<string, string>>();
+    const [year, month] = String(body.month || "").split("-").map(Number);
+    const deadline = new Date(body.deadlineAt);
+    const arrivalDate = body.arrivalDate;
+    const cycleId = Number(c.req.param("id"));
+    if (!cycleId || !year || !month || Number.isNaN(deadline.getTime()) || !/^\d{4}-\d{2}-\d{2}$/.test(arrivalDate)) return jsonError("対象月・締切日時・必着日を入力してください。", 422);
+    const result = await c.env.DB.prepare("UPDATE order_cycles SET year=?, month=?, deadline_at=?, order_date=?, arrival_date=?, updated_at=? WHERE id=?")
+      .bind(year, month, deadline.toISOString(), dateOnly(new Date(deadline.getTime() + 86400000).toISOString()), arrivalDate, now(), cycleId).run();
+    if (!result.meta.changes) return jsonError("注文サイクルが見つかりません。", 404);
+    return c.json({ ok: true });
+  } catch (error) { return jsonError(error instanceof Error ? error.message : "注文サイクルを更新できませんでした。", 422); }
+});
+
 async function pdfData(env: Env, cycleId: number) {
   const cycle = await env.DB.prepare("SELECT * FROM order_cycles WHERE id = ?").bind(cycleId).first<Record<string, string | number>>();
   if (!cycle) throw new Error("注文サイクルが見つかりません。");

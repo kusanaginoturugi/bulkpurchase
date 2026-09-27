@@ -240,7 +240,7 @@ app.get("/admin", (c) => user(c).role === "admin" ? c.html(renderPage(user(c), "
 
 async function currentCycle(env: Env) {
   const nowValue = now();
-  return env.DB.prepare("SELECT * FROM order_cycles WHERE status != 'sent' AND deadline_at >= ? ORDER BY deadline_at ASC LIMIT 1").bind(nowValue).first<Record<string, string | number>>();
+  return env.DB.prepare("SELECT * FROM order_cycles WHERE status != 'sent' AND (deadline_at >= ? OR additional_order_until >= ?) ORDER BY CASE WHEN deadline_at >= ? THEN 0 ELSE 1 END, deadline_at ASC LIMIT 1").bind(nowValue, nowValue, nowValue).first<Record<string, string | number | null>>();
 }
 
 async function fellowships(env: Env) {
@@ -270,7 +270,7 @@ app.get("/api/current-order", async (c) => {
   return c.json({
     admin: loggedInUser.role === "admin",
     fellowships: availableFellowships,
-    cycle: { id: cycle.id, label: `${cycle.year}年${String(cycle.month).padStart(2, "0")}月`, orderDate: cycle.order_date, arrivalDate: cycle.arrival_date, deadlineDate: new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", year: "numeric", month: "long", day: "numeric", weekday: "short" }).format(deadline), deadlineTime: new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", hour: "2-digit", minute: "2-digit", hour12: false }).format(deadline) },
+    cycle: { id: cycle.id, label: `${cycle.year}年${String(cycle.month).padStart(2, "0")}月`, orderDate: cycle.order_date, arrivalDate: cycle.arrival_date, deadlineDate: new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", year: "numeric", month: "long", day: "numeric", weekday: "short" }).format(deadline), deadlineTime: new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", hour: "2-digit", minute: "2-digit", hour12: false }).format(deadline), additionalOrderUntil: cycle.additional_order_until || null },
     order: { fellowshipId: fellowship.id, fellowshipLabel: displayName(fellowship), ordererName: order?.orderer_name || loggedInUser.name, pickupName: order?.pickup_name || "", status: order?.status || "draft", registered: Boolean(order), items }
   });
 });
@@ -476,14 +476,14 @@ app.get("/api/admin/tendo-status", async (c) => {
   try {
     requireAdmin(c);
     const [cycles, logs] = await Promise.all([
-      c.env.DB.prepare("SELECT id, year, month, tendo_send_at, tendo_sent_at, tendo_email_sent_at, tendo_auto_email_sent_at, tendo_send_error FROM order_cycles ORDER BY year DESC, month DESC").all<Record<string, string | number | null>>(),
+      c.env.DB.prepare("SELECT id, year, month, tendo_send_at, tendo_sent_at, tendo_email_sent_at, tendo_auto_email_sent_at, tendo_send_error, additional_order_until FROM order_cycles ORDER BY year DESC, month DESC").all<Record<string, string | number | null>>(),
       c.env.DB.prepare("SELECT l.order_cycle_id, l.channel, l.trigger_type, l.status, l.detail, l.sent_at, c.year, c.month FROM tendo_send_logs l JOIN order_cycles c ON c.id=l.order_cycle_id ORDER BY l.sent_at DESC LIMIT 50").all<Record<string, string | number>>()
     ]);
     return c.json({
       notificationEmail: c.env.TENDO_NOTIFICATION_EMAIL,
       senderName: c.env.TENDO_SENDER_NAME,
       fellowshipName: c.env.TENDO_FELLOWSHIP_NAME,
-      cycles: cycles.results.map((cycle) => ({ id: cycle.id, label: `${cycle.year}年${String(cycle.month).padStart(2, "0")}月`, tendoSendAt: cycle.tendo_send_at, tendoSentAt: cycle.tendo_sent_at, emailSentAt: cycle.tendo_auto_email_sent_at, manualEmailSentAt: cycle.tendo_email_sent_at, error: cycle.tendo_send_error })),
+      cycles: cycles.results.map((cycle) => ({ id: cycle.id, label: `${cycle.year}年${String(cycle.month).padStart(2, "0")}月`, tendoSendAt: cycle.tendo_send_at, tendoSentAt: cycle.tendo_sent_at, emailSentAt: cycle.tendo_auto_email_sent_at, manualEmailSentAt: cycle.tendo_email_sent_at, error: cycle.tendo_send_error, additionalOrderUntil: cycle.additional_order_until })),
       logs: logs.results.map((log) => ({ cycleId: log.order_cycle_id, label: `${log.year}年${String(log.month).padStart(2, "0")}月`, channel: log.channel, triggerType: log.trigger_type, status: log.status, detail: log.detail, sentAt: log.sent_at }))
     });
   } catch (error) { return jsonError(error instanceof Error ? error.message : "送信状況を取得できませんでした。", 403); }
@@ -498,6 +498,18 @@ app.post("/api/admin/cycles/:id/tendo", async (c) => {
     await sendNotificationEmail(c.env, cycleId, false);
     return c.json({ ok: true });
   } catch (error) { return jsonError(error instanceof Error ? error.message : "天道への再送信に失敗しました。", 422); }
+});
+
+app.post("/api/admin/cycles/:id/additional-order", async (c) => {
+  try {
+    requireAdmin(c); requireCsrf(c);
+    const cycleId = Number(c.req.param("id"));
+    if (!cycleId) return jsonError("注文サイクルが見つかりません。", 404);
+    const additionalOrderUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const result = await c.env.DB.prepare("UPDATE order_cycles SET additional_order_until=?, updated_at=? WHERE id=?").bind(additionalOrderUntil, now(), cycleId).run();
+    if (!result.meta.changes) return jsonError("注文サイクルが見つかりません。", 404);
+    return c.json({ ok: true, additionalOrderUntil });
+  } catch (error) { return jsonError(error instanceof Error ? error.message : "追加注文の受付を開始できませんでした。", 422); }
 });
 
 async function scheduledSend(env: Env) {

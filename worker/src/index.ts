@@ -243,7 +243,7 @@ app.get("/api/current-order", async (c) => {
     admin: loggedInUser.role === "admin",
     fellowships: availableFellowships,
     cycle: { id: cycle.id, label: `${cycle.year}年${String(cycle.month).padStart(2, "0")}月`, orderDate: cycle.order_date, arrivalDate: cycle.arrival_date, deadlineDate: new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", year: "numeric", month: "long", day: "numeric", weekday: "short" }).format(deadline), deadlineTime: new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", hour: "2-digit", minute: "2-digit", hour12: false }).format(deadline) },
-    order: { fellowshipId: fellowship.id, fellowshipLabel: displayName(fellowship), ordererName: order?.orderer_name || loggedInUser.name, pickupName: order?.pickup_name || "", status: order?.status || "draft", items }
+    order: { fellowshipId: fellowship.id, fellowshipLabel: displayName(fellowship), ordererName: order?.orderer_name || loggedInUser.name, pickupName: order?.pickup_name || "", status: order?.status || "draft", registered: Boolean(order), items }
   });
 });
 

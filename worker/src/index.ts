@@ -8,7 +8,7 @@ import { renderPage } from "./ui";
 type AppBindings = { Bindings: Env; Variables: { user: SessionUser } };
 
 const app = new Hono<AppBindings>();
-const managedCodes = ["31101", "31201", "31303", "31304", "31305", "31407", "31901", "32204", "32205"];
+const managedCodes = ["31101", "31201", "31303", "31304", "31305", "31407", "31901", "32204", "32205", "99300"];
 const fixedUnits: Record<string, string> = {
   "白陽八卦符": "組",
   "大國陰陽符": "組",

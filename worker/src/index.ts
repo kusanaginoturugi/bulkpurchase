@@ -350,7 +350,7 @@ app.get("/api/admin/bootstrap", async (c) => {
   try {
     requireAdmin(c);
     const [cycles, orders, orderItems, items, users, fellowshipRows] = await Promise.all([
-      c.env.DB.prepare("SELECT id, year, month, deadline_at, arrival_date, status FROM order_cycles ORDER BY year DESC, month DESC").all<Record<string, string | number>>(),
+      c.env.DB.prepare("SELECT id, year, month, deadline_at, arrival_date, status, tendo_send_at, tendo_sent_at, tendo_send_error FROM order_cycles ORDER BY year DESC, month DESC").all<Record<string, string | number | null>>(),
       c.env.DB.prepare("SELECT o.id, o.orderer_name, o.status, f.code, f.name AS fellowship_name, oc.year, oc.month FROM orders o JOIN fellowships f ON f.id=o.fellowship_id JOIN order_cycles oc ON oc.id=o.order_cycle_id ORDER BY oc.year DESC, oc.month DESC, f.code").all<Record<string, string | number>>(),
       c.env.DB.prepare("SELECT order_id, item_name, variant_name, quantity, unit, sort_order FROM order_items ORDER BY order_id, sort_order, id").all<Record<string, string | number | null>>(),
       c.env.DB.prepare("SELECT id, code, name, unit FROM items ORDER BY code").all<Item>(),
@@ -364,7 +364,7 @@ app.get("/api/admin/bootstrap", async (c) => {
       values.push({ itemName: String(entry.item_name), variantName: String(entry.variant_name || ""), quantity: Number(entry.quantity), unit: String(entry.unit) });
       itemsByOrder.set(orderId, values);
     });
-    return c.json({ cycles: cycles.results.map((entry) => ({ id: entry.id, label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, deadlineAt: entry.deadline_at, deadlineLabel: deadlineLabel(entry.deadline_at), arrivalDate: entry.arrival_date, status: entry.status === "open" ? "受付中" : entry.status === "closed" ? "締切" : "送信済み" })), orders: orders.results.map((entry) => ({ label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, fellowship: `${entry.code} ${entry.fellowship_name}`, ordererName: entry.orderer_name, status: entry.status === "submitted" ? "提出済み" : "下書き", items: itemsByOrder.get(Number(entry.id)) ?? [] })), items: items.results, users: users.results.map((entry) => ({ name: entry.name, email: entry.email, role: entry.role === "admin" ? "管理者" : "利用者", fellowship: `${entry.code} ${entry.fellowship_name}` })), fellowships: fellowshipRows });
+    return c.json({ cycles: cycles.results.map((entry) => ({ id: entry.id, label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, deadlineAt: entry.deadline_at, deadlineLabel: deadlineLabel(String(entry.deadline_at)), arrivalDate: entry.arrival_date, status: entry.status === "open" ? "受付中" : entry.status === "closed" ? "締切" : "送信済み", tendoSendAt: entry.tendo_send_at, tendoSendLabel: entry.tendo_send_at ? deadlineLabel(String(entry.tendo_send_at)) : "未設定", tendoSentAt: entry.tendo_sent_at, tendoSendError: entry.tendo_send_error })), orders: orders.results.map((entry) => ({ label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, fellowship: `${entry.code} ${entry.fellowship_name}`, ordererName: entry.orderer_name, status: entry.status === "submitted" ? "提出済み" : "下書き", items: itemsByOrder.get(Number(entry.id)) ?? [] })), items: items.results, users: users.results.map((entry) => ({ name: entry.name, email: entry.email, role: entry.role === "admin" ? "管理者" : "利用者", fellowship: `${entry.code} ${entry.fellowship_name}` })), fellowships: fellowshipRows });
   } catch (error) {
     return jsonError(error instanceof Error ? error.message : "管理情報を取得できませんでした。", 403);
   }
@@ -376,9 +376,10 @@ app.post("/api/admin/cycles", async (c) => {
     const body = await c.req.json<Record<string, string>>();
     const [year, month] = String(body.month || "").split("-").map(Number);
     const deadline = deadlineFromJapan(body.deadlineAt);
+    const tendoSendAt = body.tendoSendAt ? deadlineFromJapan(body.tendoSendAt) : deadline;
     const arrivalDate = body.arrivalDate;
-    if (!year || !month || !deadline || !/^\d{4}-\d{2}-\d{2}$/.test(arrivalDate)) return jsonError("対象月・締切日時・必着日を入力してください。", 422);
-    await c.env.DB.prepare("INSERT INTO order_cycles (year, month, deadline_at, order_date, arrival_date, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'open', ?, ?)").bind(year, month, deadline.toISOString(), japanDateOnly(new Date(deadline.getTime() + 86400000)), arrivalDate, now(), now()).run();
+    if (!year || !month || !deadline || !tendoSendAt || !/^\d{4}-\d{2}-\d{2}$/.test(arrivalDate)) return jsonError("対象月・締切日時・必着日・自動送信日時を入力してください。", 422);
+    await c.env.DB.prepare("INSERT INTO order_cycles (year, month, deadline_at, order_date, arrival_date, status, tendo_send_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'open', ?, ?, ?)").bind(year, month, deadline.toISOString(), japanDateOnly(new Date(deadline.getTime() + 86400000)), arrivalDate, tendoSendAt.toISOString(), now(), now()).run();
     return c.json({ ok: true });
   } catch (error) { return jsonError(error instanceof Error ? error.message : "注文サイクルを登録できませんでした。", 422); }
 });
@@ -389,13 +390,14 @@ app.put("/api/admin/cycles/:id", async (c) => {
     const body = await c.req.json<Record<string, string>>();
     const [year, month] = String(body.month || "").split("-").map(Number);
     const deadline = deadlineFromJapan(body.deadlineAt);
+    const tendoSendAt = body.tendoSendAt ? deadlineFromJapan(body.tendoSendAt) : null;
     const arrivalDate = body.arrivalDate;
     const cycleId = Number(c.req.param("id"));
-    if (!cycleId || !year || !month || !deadline || !/^\d{4}-\d{2}-\d{2}$/.test(arrivalDate)) return jsonError("対象月・締切日時・必着日を入力してください。", 422);
+    if (!cycleId || !year || !month || !deadline || (body.tendoSendAt && !tendoSendAt) || !/^\d{4}-\d{2}-\d{2}$/.test(arrivalDate)) return jsonError("対象月・締切日時・必着日・自動送信日時を入力してください。", 422);
     const duplicate = await c.env.DB.prepare("SELECT id FROM order_cycles WHERE year = ? AND month = ? AND id != ?").bind(year, month, cycleId).first();
     if (duplicate) return jsonError("同じ対象月の注文サイクルが既に登録されています。", 422);
-    const result = await c.env.DB.prepare("UPDATE order_cycles SET year=?, month=?, deadline_at=?, order_date=?, arrival_date=?, updated_at=? WHERE id=?")
-      .bind(year, month, deadline.toISOString(), japanDateOnly(new Date(deadline.getTime() + 86400000)), arrivalDate, now(), cycleId).run();
+    const result = await c.env.DB.prepare("UPDATE order_cycles SET year=?, month=?, deadline_at=?, order_date=?, arrival_date=?, tendo_send_at=COALESCE(?, tendo_send_at, ?), updated_at=? WHERE id=?")
+      .bind(year, month, deadline.toISOString(), japanDateOnly(new Date(deadline.getTime() + 86400000)), arrivalDate, tendoSendAt?.toISOString() ?? null, deadline.toISOString(), now(), cycleId).run();
     if (!result.meta.changes) return jsonError("注文サイクルが見つかりません。", 404);
     return c.json({ ok: true });
   } catch (error) { return jsonError(error instanceof Error ? error.message : "注文サイクルを更新できませんでした。", 422); }

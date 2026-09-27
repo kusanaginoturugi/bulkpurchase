@@ -36,10 +36,12 @@ function escapeHtml(value: string) {
 
 function htmlItemName(name: string) {
   const variant = name.match(/「([^」]+)」/);
-  const formatted = variant
-    ? `${escapeHtml(name.slice(0, variant.index))}<b class="variant">${escapeHtml(variant[0])}</b>${escapeHtml(name.slice((variant.index || 0) + variant[0].length))}`
-    : escapeHtml(name);
-  return formatted.replace(/\s*\/\s*/g, "<br>").replace(/\s*([（(])(?!組[）)])/g, "<br>$1").replace(/・\s*/g, "・<br>");
+  const lineBreaks = (value: string) => escapeHtml(value).replace(/\s*\/\s*/g, "<br>").replace(/\s*([（(])(?!組[）)])/g, "<br>$1").replace(/・\s*/g, "・<br>");
+  if (!variant) return lineBreaks(name);
+  const variantStart = variant.index || 0;
+  const before = lineBreaks(name.slice(0, variantStart));
+  const after = lineBreaks(name.slice(variantStart + variant[0].length));
+  return `<table class="item-label"><tr><td>${before}</td><td class="variant">${escapeHtml(variant[0])}</td><td>${after}</td></tr></table>`;
 }
 
 function orderPdfHtml(input: {
@@ -71,7 +73,7 @@ function orderPdfHtml(input: {
     table { width:100%; border-collapse:collapse; table-layout:fixed; border:1.2pt solid #242424; font-size:${tableFontSize}pt; }
     th,td { border:.55pt solid #333; vertical-align:middle; text-align:center; line-height:1.25; padding:1.8mm 1.2mm; }
     th { background:#f2f0ec; height:${rowHeight + 3}mm; font-size:${headerFontSize}pt; font-weight:700; } td { height:${rowHeight}mm; } th:first-child,td.item { width:31%; }
-    th:last-child,td.total { width:8%; } td.item { padding:1.2mm 3mm; font-size:${tableFontSize}pt; white-space:nowrap; } td.item b.variant { font-family:"Noto Sans JP",sans-serif; font-weight:700; } td.total { font-family:"Noto Sans JP",sans-serif; font-weight:700; }
+    th:last-child,td.total { width:8%; } td.item { padding:1.2mm 3mm; font-size:${tableFontSize}pt; white-space:nowrap; } table.item-label { display:inline-table; width:auto; border:0; font:inherit; } table.item-label td { width:auto; height:auto; border:0; padding:0; font:inherit; white-space:nowrap; } table.item-label td.variant { font-family:"Noto Sans JP",sans-serif; font-weight:700; } td.total { font-family:"Noto Sans JP",sans-serif; font-weight:700; }
     tr { break-inside:avoid; } .empty { height:25mm; color:#555; } .footer { margin-top:3mm; text-align:right; font-family:"Noto Sans JP",sans-serif; font-size:8.5pt; color:#555; }
   </style></head><body><main class="sheet"><p class="notice">${escapeHtml(deadline)}</p><h1>聖明王院　一括道具注文書</h1><div class="meta"><span>注文日(送信日)　${escapeHtml(input.orderDate)}</span></div><table><thead><tr><th>道具名</th>${headers}<th>合計</th></tr></thead><tbody>${rows}</tbody></table><div class="footer">聖明王院 道具一括注文</div></main></body></html>`;
 }

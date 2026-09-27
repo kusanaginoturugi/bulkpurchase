@@ -9,7 +9,14 @@ type AppBindings = { Bindings: Env; Variables: { user: SessionUser } };
 
 const app = new Hono<AppBindings>();
 const managedCodes = ["31101", "31201", "31303", "31304", "31305", "31407", "31901", "32204", "32205"];
-const fixedUnits: Record<string, string> = { "修霊超抜之御柱": "本" };
+const fixedUnits: Record<string, string> = {
+  "白陽八卦符": "組",
+  "大國陰陽符": "組",
+  "みろく鵺符": "組",
+  "灶君護摩符": "組",
+  "そう君護摩符": "組",
+  "修霊超抜之御柱": "本"
+};
 
 const jsonError = (message: string, status = 400) => new Response(JSON.stringify({ error: message }), { status, headers: { "Content-Type": "application/json; charset=utf-8" } });
 const now = () => new Date().toISOString();
@@ -267,7 +274,7 @@ app.put("/api/current-order", async (c) => {
       if (!itemName && !quantity) continue;
       const itemId = entry.itemId ? Number(entry.itemId) : null;
       const item = itemId ? await c.env.DB.prepare("SELECT id, code, name, unit, special_handling_type FROM items WHERE id = ? AND active = 1").bind(itemId).first<Item>() : null;
-      const unit = item?.unit || fixedUnits[itemName] || String(entry.unit || "").trim();
+      const unit = fixedUnits[itemName] || item?.unit || String(entry.unit || "").trim();
       const variantName = String(entry.variantName || "").trim();
       const needsVariant = item?.code === "201002";
       const selectionVariants = item?.code === "210001" || /灶君|そう君/.test(itemName) || item?.code === "205002" || itemName.includes("四神獣符");

@@ -7,7 +7,7 @@ INSERT INTO items (code, name, value, refund, unit, special_handling_type, activ
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("102000", "収天･灶君護摩木", 200, 100, "本", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("105001", "三會龍華之御柱", 500, 50, "本", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("105002", "三會以外のHP", 500, 0, "枚", "none", 1);
-INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("108000", "三期滅劫之霊木", 800, 100, "枚", "none", 1);
+INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("108000", "三期滅劫之霊木", 800, 100, "本", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("120001", "三界平定･有気之御柱", 2000, 300, "本", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("120002", "八大明王如意棒", 2000, 800, "本", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("130001", "龍樹滅業棒", 3000, 1200, "本", "none", 1);

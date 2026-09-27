@@ -431,7 +431,7 @@ app.post("/api/admin/cycles/:id/email", async (c) => {
   } catch (error) { return jsonError(error instanceof Error ? error.message : "通知メールを送信できませんでした。", 422); }
 });
 
-async function sendNotificationEmail(env: Env, cycleId: number) {
+async function sendNotificationEmail(env: Env, cycleId: number, automatic = false) {
   if (!env.RESEND_API_KEY || !env.RESEND_FROM) throw new Error("通知メールの送信設定がまだ完了していません。");
   const data = await pdfData(env, cycleId);
   const label = `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`;
@@ -442,7 +442,8 @@ async function sendNotificationEmail(env: Env, cycleId: number) {
     body: JSON.stringify({ from: env.RESEND_FROM, to: [env.TENDO_NOTIFICATION_EMAIL], subject: `【一括注文】${label}分`, html: `<p>${label}の道具一括注文書を添付します。</p>`, attachments: [{ filename: "一括道具注文書.pdf", content: toBase64(new Uint8Array(bytes)) }] })
   });
   if (!response.ok) throw new Error(`通知メールの送信に失敗しました（HTTP ${response.status}）`);
-  await env.DB.prepare("UPDATE order_cycles SET tendo_email_sent_at=?, tendo_send_error=NULL, updated_at=? WHERE id=?").bind(now(), now(), cycleId).run();
+  const sentColumn = automatic ? "tendo_auto_email_sent_at" : "tendo_email_sent_at";
+  await env.DB.prepare(`UPDATE order_cycles SET ${sentColumn}=?, tendo_send_error=NULL, updated_at=? WHERE id=?`).bind(now(), now(), cycleId).run();
 }
 
 async function sendTendoPdf(env: Env, cycleId: number) {
@@ -458,11 +459,11 @@ async function sendTendoPdf(env: Env, cycleId: number) {
 
 async function scheduledSend(env: Env) {
   const emailEnabled = Boolean(env.RESEND_API_KEY && env.RESEND_FROM);
-  const cycles = await env.DB.prepare("SELECT id, tendo_sent_at, tendo_email_sent_at FROM order_cycles WHERE tendo_send_at IS NOT NULL AND tendo_send_at <= ? AND (tendo_sent_at IS NULL OR (? = 1 AND tendo_email_sent_at IS NULL))").bind(now(), emailEnabled ? 1 : 0).all<{ id: number; tendo_sent_at: string | null; tendo_email_sent_at: string | null }>();
+  const cycles = await env.DB.prepare("SELECT id, tendo_sent_at, tendo_auto_email_sent_at FROM order_cycles WHERE tendo_send_at IS NOT NULL AND tendo_send_at <= ? AND (tendo_sent_at IS NULL OR (? = 1 AND tendo_auto_email_sent_at IS NULL))").bind(now(), emailEnabled ? 1 : 0).all<{ id: number; tendo_sent_at: string | null; tendo_auto_email_sent_at: string | null }>();
   for (const cycle of cycles.results) {
     try {
       if (!cycle.tendo_sent_at) await sendTendoPdf(env, cycle.id);
-      if (emailEnabled && !cycle.tendo_email_sent_at) await sendNotificationEmail(env, cycle.id);
+      if (emailEnabled && !cycle.tendo_auto_email_sent_at) await sendNotificationEmail(env, cycle.id, true);
     } catch (error) { await env.DB.prepare("UPDATE order_cycles SET tendo_send_error=?, updated_at=? WHERE id=?").bind(error instanceof Error ? error.message.slice(0, 500) : "PDF送信に失敗しました。", now(), cycle.id).run(); }
   }
   await env.DB.prepare("DELETE FROM sessions WHERE expires_at <= ?").bind(now()).run();

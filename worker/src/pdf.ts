@@ -35,7 +35,7 @@ function escapeHtml(value: string) {
 }
 
 function htmlItemName(name: string) {
-  return escapeHtml(name).replace(/「([^」]+)」/g, "<strong>「$1」</strong>").replace(/\s*\/\s*/g, "<br>").replace(/\s*([（(])(?!組[）)])/g, "<br>$1").replace(/・\s*/g, "・<br>");
+  return escapeHtml(name).replace(/\s*\/\s*/g, "<br>").replace(/\s*([（(])(?!組[）)])/g, "<br>$1").replace(/・\s*/g, "・<br>");
 }
 
 function orderPdfHtml(input: {
@@ -54,7 +54,7 @@ function orderPdfHtml(input: {
   const rowHeight = fellowshipCount <= 2 ? 15 : fellowshipCount <= 5 ? 13 : 12;
   const headers = input.fellowships.map((fellowship) => `<th>${escapeHtml(fellowship.name)}</th>`).join("");
   const rows = input.rows.length
-    ? input.rows.map((row) => `<tr><td class="item">${htmlItemName(`${row.name}${row.unit === "組" ? "(組)" : ""}`)}</td>${input.fellowships.map((fellowship) => `<td>${row.quantities[fellowship.id] || ""}</td>`).join("")}<td class="total">${row.total}</td></tr>`).join("")
+    ? input.rows.map((row) => `<tr><td class="item${row.name.includes("「") ? " has-variant" : ""}">${htmlItemName(`${row.name}${row.unit === "組" ? "(組)" : ""}`)}</td>${input.fellowships.map((fellowship) => `<td>${row.quantities[fellowship.id] || ""}</td>`).join("")}<td class="total">${row.total}</td></tr>`).join("")
     : `<tr><td class="empty" colspan="${input.fellowships.length + 2}">提出済みの注文はありません</td></tr>`;
 
   return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;500;700&display=block" rel="stylesheet"><style>
@@ -67,7 +67,7 @@ function orderPdfHtml(input: {
     table { width:100%; border-collapse:collapse; table-layout:fixed; border:1.2pt solid #242424; font-size:${tableFontSize}pt; }
     th,td { border:.55pt solid #333; vertical-align:middle; text-align:center; line-height:1.25; padding:1.8mm 1.2mm; }
     th { background:#f2f0ec; height:${rowHeight + 3}mm; font-size:${headerFontSize}pt; font-weight:700; } td { height:${rowHeight}mm; } th:first-child,td.item { width:31%; }
-    th:last-child,td.total { width:8%; } td.item { padding:1.2mm 3mm; font-size:${tableFontSize}pt; white-space:nowrap; } td.item strong { font-family:"Noto Sans JP",sans-serif; font-weight:700; } td.total { font-family:"Noto Sans JP",sans-serif; font-weight:700; }
+    th:last-child,td.total { width:8%; } td.item { padding:1.2mm 3mm; font-size:${tableFontSize}pt; white-space:nowrap; } td.item.has-variant { font-family:"Noto Sans JP",sans-serif; font-weight:700; } td.total { font-family:"Noto Sans JP",sans-serif; font-weight:700; }
     tr { break-inside:avoid; } .empty { height:25mm; color:#555; } .footer { margin-top:3mm; text-align:right; font-family:"Noto Sans JP",sans-serif; font-size:8.5pt; color:#555; }
   </style></head><body><main class="sheet"><p class="notice">${escapeHtml(deadline)}</p><h1>聖明王院　一括道具注文書</h1><div class="meta"><span>注文日(送信日)　${escapeHtml(input.orderDate)}</span></div><table><thead><tr><th>道具名</th>${headers}<th>合計</th></tr></thead><tbody>${rows}</tbody></table><div class="footer">聖明王院 道具一括注文</div></main></body></html>`;
 }

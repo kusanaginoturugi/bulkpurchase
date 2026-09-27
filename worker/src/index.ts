@@ -321,14 +321,22 @@ app.get("/api/orders", async (c) => {
 app.get("/api/admin/bootstrap", async (c) => {
   try {
     requireAdmin(c);
-    const [cycles, orders, items, users, fellowshipRows] = await Promise.all([
+    const [cycles, orders, orderItems, items, users, fellowshipRows] = await Promise.all([
       c.env.DB.prepare("SELECT id, year, month, deadline_at, arrival_date, status FROM order_cycles ORDER BY year DESC, month DESC").all<Record<string, string | number>>(),
-      c.env.DB.prepare("SELECT o.orderer_name, o.status, f.code, f.name AS fellowship_name, oc.year, oc.month FROM orders o JOIN fellowships f ON f.id=o.fellowship_id JOIN order_cycles oc ON oc.id=o.order_cycle_id ORDER BY oc.year DESC, oc.month DESC, f.code").all<Record<string, string | number>>(),
+      c.env.DB.prepare("SELECT o.id, o.orderer_name, o.status, f.code, f.name AS fellowship_name, oc.year, oc.month FROM orders o JOIN fellowships f ON f.id=o.fellowship_id JOIN order_cycles oc ON oc.id=o.order_cycle_id ORDER BY oc.year DESC, oc.month DESC, f.code").all<Record<string, string | number>>(),
+      c.env.DB.prepare("SELECT order_id, item_name, variant_name, quantity, unit, sort_order FROM order_items ORDER BY order_id, sort_order, id").all<Record<string, string | number | null>>(),
       c.env.DB.prepare("SELECT id, code, name, unit FROM items ORDER BY code").all<Item>(),
       c.env.DB.prepare("SELECT u.name, u.email, u.role, f.code, f.name AS fellowship_name FROM users u JOIN fellowships f ON f.id=u.fellowship_id ORDER BY u.name").all<Record<string, string>>(),
       fellowships(c.env)
     ]);
-    return c.json({ cycles: cycles.results.map((entry) => ({ id: entry.id, label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, deadlineAt: entry.deadline_at, deadlineLabel: deadlineLabel(entry.deadline_at), arrivalDate: entry.arrival_date, status: entry.status === "open" ? "受付中" : entry.status === "closed" ? "締切" : "送信済み" })), orders: orders.results.map((entry) => ({ label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, fellowship: `${entry.code} ${entry.fellowship_name}`, ordererName: entry.orderer_name, status: entry.status === "submitted" ? "提出済み" : "下書き" })), items: items.results, users: users.results.map((entry) => ({ name: entry.name, email: entry.email, role: entry.role === "admin" ? "管理者" : "利用者", fellowship: `${entry.code} ${entry.fellowship_name}` })), fellowships: fellowshipRows });
+    const itemsByOrder = new Map<number, Array<{ itemName: string; variantName: string; quantity: number; unit: string }>>();
+    orderItems.results.forEach((entry) => {
+      const orderId = Number(entry.order_id);
+      const values = itemsByOrder.get(orderId) ?? [];
+      values.push({ itemName: String(entry.item_name), variantName: String(entry.variant_name || ""), quantity: Number(entry.quantity), unit: String(entry.unit) });
+      itemsByOrder.set(orderId, values);
+    });
+    return c.json({ cycles: cycles.results.map((entry) => ({ id: entry.id, label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, deadlineAt: entry.deadline_at, deadlineLabel: deadlineLabel(entry.deadline_at), arrivalDate: entry.arrival_date, status: entry.status === "open" ? "受付中" : entry.status === "closed" ? "締切" : "送信済み" })), orders: orders.results.map((entry) => ({ label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, fellowship: `${entry.code} ${entry.fellowship_name}`, ordererName: entry.orderer_name, status: entry.status === "submitted" ? "提出済み" : "下書き", items: itemsByOrder.get(Number(entry.id)) ?? [] })), items: items.results, users: users.results.map((entry) => ({ name: entry.name, email: entry.email, role: entry.role === "admin" ? "管理者" : "利用者", fellowship: `${entry.code} ${entry.fellowship_name}` })), fellowships: fellowshipRows });
   } catch (error) {
     return jsonError(error instanceof Error ? error.message : "管理情報を取得できませんでした。", 403);
   }

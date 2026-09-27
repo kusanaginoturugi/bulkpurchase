@@ -53,7 +53,7 @@ function orderPdfHtml(input: {
 }) {
   const date = new Date(`${input.arrivalDate}T00:00:00Z`);
   const weekday = ["日", "月", "火", "水", "木", "金", "土"][date.getUTCDay()];
-  const deadline = `※${date.getUTCMonth() + 1}月${date.getUTCDate()}日(${weekday})までに弥勒大仏殿着でお願いします。`;
+  const deadline = `※${date.getUTCMonth() + 1}月${date.getUTCDate()}日(${weekday})聖明王院弥勒大仏殿必着でお願いします。`;
   const fellowshipCount = input.fellowships.length;
   const tableFontSize = fellowshipCount <= 2 ? 16 : fellowshipCount <= 5 ? 14 : 12;
   const headerFontSize = fellowshipCount <= 2 ? 18 : fellowshipCount <= 5 ? 16 : 13;
@@ -68,14 +68,14 @@ function orderPdfHtml(input: {
     * { box-sizing: border-box; } html,body { margin:0; padding:0; color:#161616; background:#fff; }
     body { font-family:"Noto Serif JP","Yu Mincho",serif; } .sheet { width:100%; }
     .notice { margin:0 0 3mm; text-align:center; font-size:11.5pt; font-weight:700; letter-spacing:.025em; }
-    h1 { margin:0; text-align:center; font-size:20pt; line-height:1.3; letter-spacing:.08em; }
+    h1 { margin:0; text-align:center; font-family:"Noto Sans JP",sans-serif; font-size:24pt; line-height:1.3; font-weight:700; letter-spacing:.04em; }
     .meta { margin:4mm 0 3mm; display:flex; justify-content:flex-start; align-items:center; font-family:"Noto Sans JP",sans-serif; font-size:10.5pt; font-weight:500; }
     table { width:100%; border-collapse:collapse; table-layout:fixed; border:1.2pt solid #242424; font-size:${tableFontSize}pt; }
     th,td { border:.55pt solid #333; vertical-align:middle; text-align:center; line-height:1.25; padding:1.8mm 1.2mm; }
     th { background:#f2f0ec; height:${rowHeight + 3}mm; font-size:${headerFontSize}pt; font-weight:700; } td { height:${rowHeight}mm; } th:first-child,td.item { width:31%; }
     th:last-child,td.total { width:8%; } td.item { padding:1.2mm 3mm; font-size:${tableFontSize}pt; white-space:nowrap; } table.item-label { display:inline-table; width:auto; border:0; font:inherit; } table.item-label td { width:auto; height:auto; border:0; padding:0; font:inherit; white-space:nowrap; } table.item-label td.variant { font-family:"Noto Sans JP",sans-serif; font-weight:700; } td.total { font-family:"Noto Sans JP",sans-serif; font-weight:700; }
     tr { break-inside:avoid; } .empty { height:25mm; color:#555; } .footer { margin-top:3mm; text-align:right; font-family:"Noto Sans JP",sans-serif; font-size:8.5pt; color:#555; }
-  </style></head><body><main class="sheet"><p class="notice">${escapeHtml(deadline)}</p><h1>聖明王院　一括道具注文書</h1><div class="meta"><span>注文日(送信日)　${escapeHtml(input.orderDate)}</span></div><table><thead><tr><th>道具名</th>${headers}<th>合計</th></tr></thead><tbody>${rows}</tbody></table><div class="footer">聖明王院 道具一括注文</div></main></body></html>`;
+  </style></head><body><main class="sheet"><p class="notice">${escapeHtml(deadline)}</p><h1>聖明王院一括道具注文書</h1><div class="meta"><span>注文日(送信日)　${escapeHtml(input.orderDate)}</span></div><table><thead><tr><th>道具名</th>${headers}<th>合計</th></tr></thead><tbody>${rows}</tbody></table><div class="footer">聖明王院 道具一括注文</div></main></body></html>`;
 }
 
 async function createStyledOrderPdf(browser: BrowserRun, input: Parameters<typeof orderPdfHtml>[0]) {
@@ -123,10 +123,10 @@ export async function createOrderPdf(input: {
   // 日付だけをUTCとして扱い、日本時間の曜日が前日にずれないようにする。
   const date = new Date(`${input.arrivalDate}T00:00:00Z`);
   const weekday = ["日", "月", "火", "水", "木", "金", "土"][date.getUTCDay()];
-  const header = `※${date.getUTCMonth() + 1}月${date.getUTCDate()}日(${weekday})までに弥勒大仏殿着でお願いします。`;
+  const header = `※${date.getUTCMonth() + 1}月${date.getUTCDate()}日(${weekday})聖明王院弥勒大仏殿必着でお願いします。`;
   text(header, margin, y, 15, "center", width - margin * 2);
   y -= 28;
-  text("聖明王院 一括道具注文書", margin, y, 19, "center", width - margin * 2);
+  text("聖明王院一括道具注文書", margin, y, 22, "center", width - margin * 2);
   y -= 30;
   text(`【注文日】 ${input.orderDate}`, margin, y, 12);
   y -= 16;

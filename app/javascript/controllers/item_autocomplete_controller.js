@@ -8,6 +8,7 @@ export default class extends Controller {
       this.updateVariantPlaceholder(this.queryTarget.value.trim())
     }
     this.updateVariantControl(this.queryTarget.value.trim())
+    this.updateUnitControl(this.queryTarget.value.trim())
   }
 
   syncQuery() {
@@ -26,7 +27,7 @@ export default class extends Controller {
     this.itemCodeTarget.value = ""
     this.itemNameTarget.value = query
     this.variantNameTarget.value = ""
-    this.unitTarget.value = ""
+    this.updateUnitControl(query, { clear: true })
     this.updateVariantPlaceholder(query)
     this.updateVariantControl(query)
   }
@@ -87,6 +88,7 @@ export default class extends Controller {
     if (previousItemId !== "" && previousItemId !== String(item.id)) this.variantNameTarget.value = ""
     if (updateQuery) this.queryTarget.value = item.name
     this.unitTarget.value = item.unit || ""
+    this.setUnitLocked(true)
     this.updateVariantPlaceholder(item)
     this.updateVariantControl(item)
   }
@@ -163,7 +165,33 @@ export default class extends Controller {
     this.variantNameTarget.classList.remove("hidden")
     this.variantSelectTarget.classList.add("hidden")
     this.variantSelectTarget.value = ""
-    this.unitTarget.value = ""
+    this.updateUnitControl("", { clear: true })
+  }
+
+  updateUnitControl(query, options = {}) {
+    const fixedUnit = this.fixedUnitFor(query)
+
+    if (fixedUnit) {
+      this.unitTarget.value = fixedUnit
+      this.setUnitLocked(true)
+      return
+    }
+
+    if (options.clear) this.unitTarget.value = ""
+    this.setUnitLocked(this.itemIdTarget.value !== "")
+  }
+
+  fixedUnitFor(query) {
+    if (query.trim() === "修霊超抜之御柱") return "本"
+
+    return null
+  }
+
+  setUnitLocked(locked) {
+    this.unitTarget.readOnly = locked
+    this.unitTarget.tabIndex = locked ? -1 : 0
+    this.unitTarget.classList.toggle("bg-stone-100", locked)
+    this.unitTarget.classList.toggle("bg-white", !locked)
   }
 
   hideMenu() {

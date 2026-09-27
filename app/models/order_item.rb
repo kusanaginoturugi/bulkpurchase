@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 class OrderItem < ApplicationRecord
+  FIXED_UNITS = {
+    "修霊超抜之御柱" => "本"
+  }.freeze
+
   belongs_to :order
   belongs_to :item, optional: true
   belongs_to :item_variant, optional: true
@@ -10,6 +14,7 @@ class OrderItem < ApplicationRecord
   validate :variant_required_for_special_items
 
   before_validation :sync_from_item
+  before_validation :sync_fixed_unit
 
   def output_name
     [ item_name, variant_name.presence && "(#{variant_name})" ].compact.join
@@ -27,6 +32,10 @@ class OrderItem < ApplicationRecord
     return unless item_variant
 
     self.variant_name = item_variant.name
+  end
+
+  def sync_fixed_unit
+    self.unit = FIXED_UNITS[item_name.to_s.strip] if FIXED_UNITS.key?(item_name.to_s.strip)
   end
 
   def variant_required_for_special_items

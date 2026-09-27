@@ -19,4 +19,16 @@ class OrderItemTest < ActiveSupport::TestCase
     assert_predicate order_item, :valid?
     assert_equal "組", order_item.unit
   end
+
+  test "修霊超抜之御柱は本で保存する" do
+    order_item = OrderItem.new(
+      order: Order.new,
+      item_name: "修霊超抜之御柱",
+      quantity: 1,
+      unit: "枚"
+    )
+
+    assert_predicate order_item, :valid?
+    assert_equal "本", order_item.unit
+  end
 end

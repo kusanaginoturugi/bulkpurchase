@@ -314,8 +314,14 @@ app.get("/api/orders", async (c) => {
   const admin = loggedInUser.role === "admin";
   const query = admin ? "SELECT o.*, f.code, f.name AS fellowship_name, oc.year, oc.month FROM orders o JOIN fellowships f ON f.id=o.fellowship_id JOIN order_cycles oc ON oc.id=o.order_cycle_id ORDER BY oc.year DESC, oc.month DESC, f.code" : "SELECT o.*, f.code, f.name AS fellowship_name, oc.year, oc.month FROM orders o JOIN fellowships f ON f.id=o.fellowship_id JOIN order_cycles oc ON oc.id=o.order_cycle_id WHERE o.fellowship_id = ? ORDER BY oc.year DESC, oc.month DESC";
   const statement = c.env.DB.prepare(query);
-  const rows = admin ? await statement.all<Record<string, string | number | null>>() : await statement.bind(loggedInUser.fellowshipId).all<Record<string, string | number | null>>();
-  return c.json({ orders: rows.results.map((entry) => ({ label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, fellowship: `${entry.code} ${entry.fellowship_name}`, ordererName: entry.orderer_name, status: entry.status === "submitted" ? "提出済み" : "下書き", submittedAt: entry.submitted_at || "" })) });
+  const [rows, pastCycles] = await Promise.all([
+    admin ? statement.all<Record<string, string | number | null>>() : statement.bind(loggedInUser.fellowshipId).all<Record<string, string | number | null>>(),
+    c.env.DB.prepare("SELECT year, month FROM order_cycles WHERE deadline_at < ? ORDER BY year DESC, month DESC").bind(now()).all<{ year: number; month: number }>()
+  ]);
+  const label = (year: number, month: number) => `${year}年${String(month).padStart(2, "0")}月`;
+  const months = new Map<string, { label: string; year: number; month: number }>();
+  [...rows.results, ...pastCycles.results].forEach((entry) => months.set(label(Number(entry.year), Number(entry.month)), { label: label(Number(entry.year), Number(entry.month)), year: Number(entry.year), month: Number(entry.month) }));
+  return c.json({ months: [...months.values()].sort((a, b) => b.year - a.year || b.month - a.month).map((entry) => entry.label), orders: rows.results.map((entry) => ({ label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, fellowship: `${entry.code} ${entry.fellowship_name}`, ordererName: entry.orderer_name, status: entry.status === "submitted" ? "提出済み" : "下書き", submittedAt: entry.submitted_at || "" })) });
 });
 
 app.get("/api/admin/bootstrap", async (c) => {

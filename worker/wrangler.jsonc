@@ -1,0 +1,33 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "bulkpurchase-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-27",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "observability": {
+    "enabled": true
+  },
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bulkpurchase-db",
+      "database_id": "eb6f97e0-cc78-4835-baa2-3cbf759bed17",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "AUTHENTIK_ISSUER": "https://auth.showway.biz/application/o/bulkpurchase/",
+    "AUTHENTIK_CLIENT_ID": "bulkpurchase",
+    "AUTHENTIK_REQUIRED_GROUP": "myouou",
+    "AUTHENTIK_ADMIN_USERNAMES": "myouou",
+    "TENDO_UPLOAD_URL": "https://tendo.aa0.netvolante.jp/res.php",
+    "TENDO_DESTINATION": "mirokuji",
+    "TENDO_SENDER_NAME": "尾ノ上裕美",
+    "TENDO_FELLOWSHIP_NAME": "泉珠山梨伝道会",
+    "TENDO_NOTIFICATION_EMAIL": "jimmyouou@gmail.com"
+  }
+}

@@ -73,7 +73,7 @@ function orderPdfHtml(input: {
     * { box-sizing: border-box; } html,body { margin:0; padding:0; color:#161616; background:#fff; }
     body { font-family:"Noto Serif JP","Yu Mincho",serif; } .sheet { width:100%; }
     h1 { margin:0; text-align:center; font-family:"Noto Sans JP",sans-serif; font-size:24pt; line-height:1.3; font-weight:700; letter-spacing:.04em; }
-    .meta { margin:1.5mm 0 3mm; display:flex; justify-content:space-between; align-items:center; font-family:"Noto Sans JP",sans-serif; font-size:11pt; font-weight:700; }
+    .meta { margin:2mm 0 3mm; display:flex; justify-content:space-between; align-items:center; font-family:"Noto Sans JP",sans-serif; font-size:15pt; font-weight:700; }
     table { width:100%; border-collapse:collapse; table-layout:fixed; border:1.2pt solid #242424; font-size:${tableFontSize}pt; }
     th,td { border:.55pt solid #333; vertical-align:middle; text-align:center; line-height:1.2; padding:1.1mm 1.2mm; }
     th { background:#f2f0ec; height:${rowHeight + 3}mm; font-size:${headerFontSize}pt; font-weight:700; } td { height:${rowHeight}mm; } th:first-child,td.item { width:31%; }
@@ -130,9 +130,9 @@ export async function createOrderPdf(input: {
   const arrivalLabel = `${date.getUTCMonth() + 1}月${date.getUTCDate()}日(${weekday})　弥勒大仏殿必着`;
   text("聖明王院　一括道具注文書", margin, y, 22, "center", width - margin * 2);
   y -= 32;
-  text(`注文日　${monthDay(input.orderDate)}`, margin, y, 12, "left");
-  text(arrivalLabel, margin, y, 12, "right", width - margin * 2);
-  y -= 26;
+  text(`注文日　${monthDay(input.orderDate)}`, margin, y, 15, "left");
+  text(arrivalLabel, margin, y, 15, "right", width - margin * 2);
+  y -= 29;
 
   const drawRow = (cells: string[], headerRow = false) => {
     const height = 37;

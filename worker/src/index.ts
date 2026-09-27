@@ -27,6 +27,18 @@ function randomToken() {
   return toBase64Url(crypto.getRandomValues(new Uint8Array(32)));
 }
 
+function tokenProfile(token: string | undefined): Record<string, unknown> {
+  const payload = token?.split(".")[1];
+  if (!payload) return {};
+  try {
+    const normalized = payload.replaceAll("-", "+").replaceAll("_", "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(padded), (character) => character.charCodeAt(0)))) as Record<string, unknown>;
+  } catch {
+    return {};
+  }
+}
+
 async function sign(value: string, secret: string) {
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   return toBase64Url(new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(value))));
@@ -86,10 +98,14 @@ async function oidcConfiguration(env: Env) {
   return response.json<{ authorization_endpoint: string; token_endpoint: string; userinfo_endpoint: string }>();
 }
 
-function callbackUrl(requestUrl: string) {
-  const url = new URL(requestUrl);
+function callbackUrl(request: Request) {
+  const url = new URL(request.url);
+  const forwardedHost = request.headers.get("X-Bulkpurchase-Host");
+  const host = forwardedHost === "bulkpurchase.showway.biz" ? forwardedHost : url.hostname;
   // 既存のAuthentikプロバイダに登録済みのURLを、切替後もそのまま使う。
-  url.pathname = url.hostname === "bulkpurchase.showway.biz" ? "/session/authentik/callback" : "/auth/callback";
+  url.protocol = "https:";
+  url.hostname = host;
+  url.pathname = host === "bulkpurchase.showway.biz" ? "/session/authentik/callback" : "/auth/callback";
   url.search = "";
   return url.toString();
 }
@@ -103,7 +119,7 @@ app.get("/login", async (c) => {
     const nonce = randomToken();
     const cookie = await signedValue(JSON.stringify({ state, nonce }), c.env.SESSION_SECRET);
     setCookie(c, "bp_oauth", cookie, { httpOnly: true, secure: true, sameSite: "Lax", maxAge: 600, path: "/" });
-    const callback = callbackUrl(c.req.url);
+    const callback = callbackUrl(c.req.raw);
     const authorization = new URL(configuration.authorization_endpoint);
     authorization.search = new URLSearchParams({
       client_id: c.env.AUTHENTIK_CLIENT_ID,
@@ -128,17 +144,19 @@ const handleAuthentikCallback = async (c: Context<AppBindings>) => {
     const code = c.req.query("code");
     if (!expected || !state || state !== expected.state || !code) return c.html("ログイン情報の確認に失敗しました。", 400);
     const configuration = await oidcConfiguration(c.env);
-    const callback = callbackUrl(c.req.url);
+    const callback = callbackUrl(c.req.raw);
     const tokenResponse = await fetch(configuration.token_endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ grant_type: "authorization_code", code, redirect_uri: callback, client_id: c.env.AUTHENTIK_CLIENT_ID, client_secret: c.env.AUTHENTIK_CLIENT_SECRET })
     });
     if (!tokenResponse.ok) return c.html("Authentikの認証に失敗しました。", 401);
-    const tokens = await tokenResponse.json<{ access_token: string }>();
+    const tokens = await tokenResponse.json<{ access_token: string; id_token?: string }>();
+    const idTokenProfile = tokenProfile(tokens.id_token);
+    if (idTokenProfile.nonce && idTokenProfile.nonce !== expected.nonce) return c.html("ログイン情報の確認に失敗しました。", 400);
     const profileResponse = await fetch(configuration.userinfo_endpoint, { headers: { Authorization: `Bearer ${tokens.access_token}` } });
-    if (!profileResponse.ok) return c.html("Authentikのユーザー情報を取得できませんでした。", 401);
-    const profile = await profileResponse.json<Record<string, unknown>>();
+    const userinfoProfile = profileResponse.ok ? await profileResponse.json<Record<string, unknown>>() : {};
+    const profile = { ...tokenProfile(tokens.access_token), ...idTokenProfile, ...userinfoProfile };
     const groups = Array.isArray(profile.groups) ? profile.groups.map(String) : Array.isArray(profile.ak_groups) ? profile.ak_groups.map(String) : [];
     if (!groups.includes(c.env.AUTHENTIK_REQUIRED_GROUP || "myouou")) return c.html("ログインできるグループに所属していません。", 403);
     const fellowships = await c.env.DB.prepare(`SELECT id, code, name FROM fellowships WHERE active = 1 AND code IN (${managedCodes.map(() => "?").join(",")})`).bind(...managedCodes).all<Fellowship>();

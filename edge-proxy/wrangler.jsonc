@@ -1,0 +1,16 @@
+{
+  "$schema": "../worker/node_modules/wrangler/config-schema.json",
+  "name": "bulkpurchase-edge",
+  "account_id": "c584ab0eba9fc9997b7034e844ac014a",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-27",
+  "observability": {
+    "enabled": true
+  },
+  "routes": [
+    {
+      "pattern": "bulkpurchase.showway.biz",
+      "custom_domain": true
+    }
+  ]
+}

@@ -9,8 +9,14 @@
 - ログイン: Authentik OAuth2 / OpenID Connect
 - 定期実行: 1分ごとのCronでPDF自動送信を確認
 
-稼働確認用のWorker URLは次です。これは移行中の確認用であり、既存の
-`bulkpurchase.showway.biz` はまだEC2を向いています。
+本番URLは次です。Authentikログインと注文入力は、このURLから行います。
+
+```text
+https://bulkpurchase.showway.biz/
+```
+
+本体WorkerのURLは次です。D1データベースと本体Workerは、D1を作成済みの
+Cloudflareアカウントにあります。
 
 ```text
 https://bulkpurchase-worker.myouougoma.workers.dev/health
@@ -59,4 +65,15 @@ cd worker
 ./scripts/import-rails-data.sh /tmp/rails-data.sql
 ```
 
-データ移行とWorkerのログイン確認後に、`bulkpurchase.showway.biz/*` のCloudflare Workersルートを `bulkpurchase-worker` に切り替えます。その後、EC2のRailsサービスを停止できます。
+## 独自ドメインの中継
+
+`showway.biz` のゾーンとD1を保有するアカウントが異なるため、`edge-proxy/` の
+`bulkpurchase-edge` が `bulkpurchase.showway.biz` のカスタムドメインを受け、本体
+Workerへ中継します。これにより、D1データを複製せずに独自ドメインで運用できます。
+
+```bash
+npx --prefix worker wrangler deploy --config edge-proxy/wrangler.jsonc
+```
+
+カスタムドメインを使うため、同じホスト名のDNS CNAMEレコードは作成しません。切替後は
+EC2のRailsサービスを停止できます。

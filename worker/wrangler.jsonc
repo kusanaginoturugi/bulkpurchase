@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "bulkpurchase-worker",
+  "account_id": "11491cf81519cdab52ed4cd993a11a2b",
   "main": "src/index.ts",
   "compatibility_date": "2026-09-27",
   "compatibility_flags": ["nodejs_compat"],

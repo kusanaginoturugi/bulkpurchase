@@ -356,6 +356,8 @@ app.put("/api/admin/cycles/:id", async (c) => {
     const arrivalDate = body.arrivalDate;
     const cycleId = Number(c.req.param("id"));
     if (!cycleId || !year || !month || !deadline || !/^\d{4}-\d{2}-\d{2}$/.test(arrivalDate)) return jsonError("対象月・締切日時・必着日を入力してください。", 422);
+    const duplicate = await c.env.DB.prepare("SELECT id FROM order_cycles WHERE year = ? AND month = ? AND id != ?").bind(year, month, cycleId).first();
+    if (duplicate) return jsonError("同じ対象月の注文サイクルが既に登録されています。", 422);
     const result = await c.env.DB.prepare("UPDATE order_cycles SET year=?, month=?, deadline_at=?, order_date=?, arrival_date=?, updated_at=? WHERE id=?")
       .bind(year, month, deadline.toISOString(), japanDateOnly(new Date(deadline.getTime() + 86400000)), arrivalDate, now(), cycleId).run();
     if (!result.meta.changes) return jsonError("注文サイクルが見つかりません。", 404);

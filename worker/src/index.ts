@@ -39,6 +39,13 @@ function deadlineLabel(value: string | number) {
   return new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", year: "numeric", month: "long", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(String(value)));
 }
 
+function japanMonthDay(value: string | number | null) {
+  if (!value) return "";
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", month: "long", day: "numeric" }).format(date);
+}
+
 function toBase64Url(bytes: Uint8Array) {
   let value = "";
   bytes.forEach((byte) => { value += String.fromCharCode(byte); });
@@ -321,7 +328,7 @@ app.get("/api/orders", async (c) => {
   const label = (year: number, month: number) => `${year}年${String(month).padStart(2, "0")}月`;
   const months = new Map<string, { label: string; year: number; month: number }>();
   [...rows.results, ...pastCycles.results].forEach((entry) => months.set(label(Number(entry.year), Number(entry.month)), { label: label(Number(entry.year), Number(entry.month)), year: Number(entry.year), month: Number(entry.month) }));
-  return c.json({ months: [...months.values()].sort((a, b) => b.year - a.year || b.month - a.month).map((entry) => entry.label), orders: rows.results.map((entry) => ({ label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, fellowship: `${entry.code} ${entry.fellowship_name}`, ordererName: entry.orderer_name, status: entry.status === "submitted" ? "提出済み" : "下書き", submittedAt: entry.submitted_at || "" })) });
+  return c.json({ months: [...months.values()].sort((a, b) => b.year - a.year || b.month - a.month).map((entry) => entry.label), orders: rows.results.map((entry) => ({ label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, fellowship: `${entry.code} ${entry.fellowship_name}`, ordererName: entry.orderer_name, status: entry.status === "submitted" ? "提出済み" : "下書き", submittedAt: japanMonthDay(entry.submitted_at) })) });
 });
 
 app.get("/api/admin/bootstrap", async (c) => {

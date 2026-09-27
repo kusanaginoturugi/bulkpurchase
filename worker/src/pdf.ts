@@ -30,13 +30,68 @@ function wrapName(name: string) {
     .replace(/・\s*/g, "・\n");
 }
 
-export async function createOrderPdf(input: {
+function escapeHtml(value: string) {
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+}
+
+function htmlItemName(name: string) {
+  return escapeHtml(name).replace(/\s*\/\s*/g, "<br>").replace(/\s*([（(])/g, "<br>$1").replace(/・\s*/g, "・<br>");
+}
+
+function orderPdfHtml(input: {
   label: string;
   orderDate: string;
   arrivalDate: string;
   fellowships: PdfFellowship[];
   rows: PdfRow[];
 }) {
+  const date = new Date(`${input.arrivalDate}T00:00:00Z`);
+  const weekday = ["日", "月", "火", "水", "木", "金", "土"][date.getUTCDay()];
+  const deadline = `※${date.getUTCMonth() + 1}月${date.getUTCDate()}日(${weekday})までに弥勒大仏殿着でお願いします。`;
+  const headers = input.fellowships.map((fellowship) => `<th>${escapeHtml(fellowship.name)}</th>`).join("");
+  const rows = input.rows.length
+    ? input.rows.map((row) => `<tr><td class="item">${htmlItemName(`${row.name}${row.unit ? ` (${row.unit})` : ""}`)}</td>${input.fellowships.map((fellowship) => `<td>${row.quantities[fellowship.id] || ""}</td>`).join("")}<td class="total">${row.total}</td></tr>`).join("")
+    : `<tr><td class="empty" colspan="${input.fellowships.length + 2}">提出済みの注文はありません</td></tr>`;
+
+  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;500;700&display=block" rel="stylesheet"><style>
+    @page { size: A4 landscape; margin: 11mm 10mm; }
+    * { box-sizing: border-box; } html,body { margin:0; padding:0; color:#161616; background:#fff; }
+    body { font-family:"Noto Serif JP","Yu Mincho",serif; } .sheet { width:100%; }
+    .notice { margin:0 0 3mm; text-align:center; font-size:11.5pt; font-weight:700; letter-spacing:.025em; }
+    h1 { margin:0; text-align:center; font-size:20pt; line-height:1.3; letter-spacing:.08em; }
+    .meta { margin:4mm 0 3mm; display:flex; justify-content:space-between; align-items:center; font-family:"Noto Sans JP",sans-serif; font-size:10.5pt; font-weight:500; }
+    table { width:100%; border-collapse:collapse; table-layout:fixed; border:1.2pt solid #242424; font-size:10.5pt; }
+    th,td { border:.55pt solid #333; vertical-align:middle; text-align:center; line-height:1.25; padding:1.8mm 1.2mm; }
+    th { background:#f2f0ec; height:13mm; font-size:11pt; font-weight:700; } td { height:11mm; } th:first-child,td.item { width:31%; }
+    th:last-child,td.total { width:8%; } td.item { padding:1.2mm 3mm; font-size:10pt; } td.total { font-family:"Noto Sans JP",sans-serif; font-weight:700; }
+    tr { break-inside:avoid; } .empty { height:25mm; color:#555; } .footer { margin-top:3mm; text-align:right; font-family:"Noto Sans JP",sans-serif; font-size:8.5pt; color:#555; }
+  </style></head><body><main class="sheet"><p class="notice">${escapeHtml(deadline)}</p><h1>聖明王院　一括道具注文書</h1><div class="meta"><span>対象月　${escapeHtml(input.label)}</span><span>注文日　${escapeHtml(input.orderDate)}</span></div><table><thead><tr><th>道具名</th>${headers}<th>合計</th></tr></thead><tbody>${rows}</tbody></table><div class="footer">聖明王院 道具一括注文</div></main></body></html>`;
+}
+
+async function createStyledOrderPdf(browser: BrowserRun, input: Parameters<typeof orderPdfHtml>[0]) {
+  const response = await browser.quickAction("pdf", {
+    html: orderPdfHtml(input),
+    gotoOptions: { waitUntil: "networkidle0", timeout: 45_000 },
+    pdfOptions: { format: "a4", landscape: true, printBackground: true, preferCSSPageSize: true, margin: { top: "0", right: "0", bottom: "0", left: "0" } }
+  });
+  if (!response.ok) throw new Error(`帳票の描画に失敗しました（HTTP ${response.status}）`);
+  return new Uint8Array(await response.arrayBuffer());
+}
+
+export async function createOrderPdf(input: {
+  label: string;
+  orderDate: string;
+  arrivalDate: string;
+  fellowships: PdfFellowship[];
+  rows: PdfRow[];
+}, browser?: BrowserRun) {
+  if (browser) {
+    try {
+      return await createStyledOrderPdf(browser, input);
+    } catch (error) {
+      console.warn("ブラウザ描画PDFを予備の帳票へ切り替えました。", error);
+    }
+  }
   const document = await PDFDocument.create();
   document.registerFontkit(fontkit);
   const font = await document.embedFont(fontBytes(), { subset: true });

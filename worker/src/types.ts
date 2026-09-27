@@ -1,5 +1,6 @@
 export interface Env {
   DB: D1Database;
+  BROWSER: BrowserRun;
   AUTHENTIK_ISSUER: string;
   AUTHENTIK_CLIENT_ID: string;
   AUTHENTIK_CLIENT_SECRET: string;

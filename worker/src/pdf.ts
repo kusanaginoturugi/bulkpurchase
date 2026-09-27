@@ -48,6 +48,10 @@ function orderPdfHtml(input: {
   const date = new Date(`${input.arrivalDate}T00:00:00Z`);
   const weekday = ["日", "月", "火", "水", "木", "金", "土"][date.getUTCDay()];
   const deadline = `※${date.getUTCMonth() + 1}月${date.getUTCDate()}日(${weekday})までに弥勒大仏殿着でお願いします。`;
+  const fellowshipCount = input.fellowships.length;
+  const tableFontSize = fellowshipCount <= 2 ? 16 : fellowshipCount <= 5 ? 14 : 12;
+  const headerFontSize = fellowshipCount <= 2 ? 18 : fellowshipCount <= 5 ? 16 : 13;
+  const rowHeight = fellowshipCount <= 2 ? 15 : fellowshipCount <= 5 ? 13 : 12;
   const headers = input.fellowships.map((fellowship) => `<th>${escapeHtml(fellowship.name)}</th>`).join("");
   const rows = input.rows.length
     ? input.rows.map((row) => `<tr><td class="item">${htmlItemName(`${row.name}${row.unit === "組" ? " (組)" : ""}`)}</td>${input.fellowships.map((fellowship) => `<td>${row.quantities[fellowship.id] || ""}</td>`).join("")}<td class="total">${row.total}</td></tr>`).join("")
@@ -60,10 +64,10 @@ function orderPdfHtml(input: {
     .notice { margin:0 0 3mm; text-align:center; font-size:11.5pt; font-weight:700; letter-spacing:.025em; }
     h1 { margin:0; text-align:center; font-size:20pt; line-height:1.3; letter-spacing:.08em; }
     .meta { margin:4mm 0 3mm; display:flex; justify-content:flex-start; align-items:center; font-family:"Noto Sans JP",sans-serif; font-size:10.5pt; font-weight:500; }
-    table { width:100%; border-collapse:collapse; table-layout:fixed; border:1.2pt solid #242424; font-size:10.5pt; }
+    table { width:100%; border-collapse:collapse; table-layout:fixed; border:1.2pt solid #242424; font-size:${tableFontSize}pt; }
     th,td { border:.55pt solid #333; vertical-align:middle; text-align:center; line-height:1.25; padding:1.8mm 1.2mm; }
-    th { background:#f2f0ec; height:13mm; font-size:11pt; font-weight:700; } td { height:11mm; } th:first-child,td.item { width:31%; }
-    th:last-child,td.total { width:8%; } td.item { padding:1.2mm 3mm; font-size:10pt; } td.total { font-family:"Noto Sans JP",sans-serif; font-weight:700; }
+    th { background:#f2f0ec; height:${rowHeight + 3}mm; font-size:${headerFontSize}pt; font-weight:700; } td { height:${rowHeight}mm; } th:first-child,td.item { width:31%; }
+    th:last-child,td.total { width:8%; } td.item { padding:1.2mm 3mm; font-size:${tableFontSize}pt; } td.total { font-family:"Noto Sans JP",sans-serif; font-weight:700; }
     tr { break-inside:avoid; } .empty { height:25mm; color:#555; } .footer { margin-top:3mm; text-align:right; font-family:"Noto Sans JP",sans-serif; font-size:8.5pt; color:#555; }
   </style></head><body><main class="sheet"><p class="notice">${escapeHtml(deadline)}</p><h1>聖明王院　一括道具注文書</h1><div class="meta"><span>注文日(送信日)　${escapeHtml(input.orderDate)}</span></div><table><thead><tr><th>道具名</th>${headers}<th>合計</th></tr></thead><tbody>${rows}</tbody></table><div class="footer">聖明王院 道具一括注文</div></main></body></html>`;
 }

@@ -20,9 +20,24 @@ const fixedUnits: Record<string, string> = {
 
 const jsonError = (message: string, status = 400) => new Response(JSON.stringify({ error: message }), { status, headers: { "Content-Type": "application/json; charset=utf-8" } });
 const now = () => new Date().toISOString();
-const dateOnly = (value: string) => value.slice(0, 10);
 const displayName = (fellowship: { code: string; name: string }) => `${fellowship.code} ${fellowship.name}`;
 const normalize = (value: string) => value.replaceAll("　", " ").trim().toLocaleLowerCase();
+
+function deadlineFromJapan(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) return null;
+  const deadline = new Date(`${value}:00+09:00`);
+  return Number.isNaN(deadline.getTime()) ? null : deadline;
+}
+
+function japanDateOnly(value: Date) {
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(value);
+  const part = (type: string) => parts.find((entry) => entry.type === type)?.value ?? "";
+  return `${part("year")}-${part("month")}-${part("day")}`;
+}
+
+function deadlineLabel(value: string | number) {
+  return new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", year: "numeric", month: "long", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(String(value)));
+}
 
 function toBase64Url(bytes: Uint8Array) {
   let value = "";
@@ -313,7 +328,7 @@ app.get("/api/admin/bootstrap", async (c) => {
       c.env.DB.prepare("SELECT u.name, u.email, u.role, f.code, f.name AS fellowship_name FROM users u JOIN fellowships f ON f.id=u.fellowship_id ORDER BY u.name").all<Record<string, string>>(),
       fellowships(c.env)
     ]);
-    return c.json({ cycles: cycles.results.map((entry) => ({ id: entry.id, label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, deadlineAt: entry.deadline_at, arrivalDate: entry.arrival_date, status: entry.status === "open" ? "受付中" : entry.status === "closed" ? "締切" : "送信済み" })), orders: orders.results.map((entry) => ({ label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, fellowship: `${entry.code} ${entry.fellowship_name}`, ordererName: entry.orderer_name, status: entry.status === "submitted" ? "提出済み" : "下書き" })), items: items.results, users: users.results.map((entry) => ({ name: entry.name, email: entry.email, role: entry.role === "admin" ? "管理者" : "利用者", fellowship: `${entry.code} ${entry.fellowship_name}` })), fellowships: fellowshipRows });
+    return c.json({ cycles: cycles.results.map((entry) => ({ id: entry.id, label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, deadlineAt: entry.deadline_at, deadlineLabel: deadlineLabel(entry.deadline_at), arrivalDate: entry.arrival_date, status: entry.status === "open" ? "受付中" : entry.status === "closed" ? "締切" : "送信済み" })), orders: orders.results.map((entry) => ({ label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, fellowship: `${entry.code} ${entry.fellowship_name}`, ordererName: entry.orderer_name, status: entry.status === "submitted" ? "提出済み" : "下書き" })), items: items.results, users: users.results.map((entry) => ({ name: entry.name, email: entry.email, role: entry.role === "admin" ? "管理者" : "利用者", fellowship: `${entry.code} ${entry.fellowship_name}` })), fellowships: fellowshipRows });
   } catch (error) {
     return jsonError(error instanceof Error ? error.message : "管理情報を取得できませんでした。", 403);
   }
@@ -324,10 +339,10 @@ app.post("/api/admin/cycles", async (c) => {
     requireAdmin(c); requireCsrf(c);
     const body = await c.req.json<Record<string, string>>();
     const [year, month] = String(body.month || "").split("-").map(Number);
-    const deadline = new Date(body.deadlineAt);
+    const deadline = deadlineFromJapan(body.deadlineAt);
     const arrivalDate = body.arrivalDate;
-    if (!year || !month || Number.isNaN(deadline.getTime()) || !/^\d{4}-\d{2}-\d{2}$/.test(arrivalDate)) return jsonError("対象月・締切日時・必着日を入力してください。", 422);
-    await c.env.DB.prepare("INSERT INTO order_cycles (year, month, deadline_at, order_date, arrival_date, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'open', ?, ?)").bind(year, month, deadline.toISOString(), dateOnly(new Date(deadline.getTime() + 86400000).toISOString()), arrivalDate, now(), now()).run();
+    if (!year || !month || !deadline || !/^\d{4}-\d{2}-\d{2}$/.test(arrivalDate)) return jsonError("対象月・締切日時・必着日を入力してください。", 422);
+    await c.env.DB.prepare("INSERT INTO order_cycles (year, month, deadline_at, order_date, arrival_date, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'open', ?, ?)").bind(year, month, deadline.toISOString(), japanDateOnly(new Date(deadline.getTime() + 86400000)), arrivalDate, now(), now()).run();
     return c.json({ ok: true });
   } catch (error) { return jsonError(error instanceof Error ? error.message : "注文サイクルを登録できませんでした。", 422); }
 });
@@ -337,12 +352,12 @@ app.put("/api/admin/cycles/:id", async (c) => {
     requireAdmin(c); requireCsrf(c);
     const body = await c.req.json<Record<string, string>>();
     const [year, month] = String(body.month || "").split("-").map(Number);
-    const deadline = new Date(body.deadlineAt);
+    const deadline = deadlineFromJapan(body.deadlineAt);
     const arrivalDate = body.arrivalDate;
     const cycleId = Number(c.req.param("id"));
-    if (!cycleId || !year || !month || Number.isNaN(deadline.getTime()) || !/^\d{4}-\d{2}-\d{2}$/.test(arrivalDate)) return jsonError("対象月・締切日時・必着日を入力してください。", 422);
+    if (!cycleId || !year || !month || !deadline || !/^\d{4}-\d{2}-\d{2}$/.test(arrivalDate)) return jsonError("対象月・締切日時・必着日を入力してください。", 422);
     const result = await c.env.DB.prepare("UPDATE order_cycles SET year=?, month=?, deadline_at=?, order_date=?, arrival_date=?, updated_at=? WHERE id=?")
-      .bind(year, month, deadline.toISOString(), dateOnly(new Date(deadline.getTime() + 86400000).toISOString()), arrivalDate, now(), cycleId).run();
+      .bind(year, month, deadline.toISOString(), japanDateOnly(new Date(deadline.getTime() + 86400000)), arrivalDate, now(), cycleId).run();
     if (!result.meta.changes) return jsonError("注文サイクルが見つかりません。", 404);
     return c.json({ ok: true });
   } catch (error) { return jsonError(error instanceof Error ? error.message : "注文サイクルを更新できませんでした。", 422); }

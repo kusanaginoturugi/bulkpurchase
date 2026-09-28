@@ -415,10 +415,11 @@ async function pdfData(env: Env, cycleId: number) {
     env.DB.prepare("SELECT oi.item_code, oi.item_name, oi.variant_name, oi.unit, oi.quantity, o.fellowship_id FROM order_items oi JOIN orders o ON o.id=oi.order_id WHERE o.order_cycle_id=? AND o.status='submitted' ORDER BY oi.item_code, oi.item_name").bind(cycleId).all<Record<string, string | number | null>>(),
     env.DB.prepare("SELECT fellowship_id, item_key, quantity FROM additional_order_snapshots WHERE order_cycle_id=?").bind(cycleId).all<{ fellowship_id: number; item_key: string; quantity: number }>()
   ]);
-  const snapshots = new Map(snapshotResult.results.map((snapshot) => [`${snapshot.fellowship_id}|${snapshot.item_key}`, Number(snapshot.quantity)]));
+  const hasSnapshot = snapshotResult.results.some((snapshot) => snapshot.fellowship_id === 0 && snapshot.item_key === "__snapshot_started__");
+  const snapshots = new Map(snapshotResult.results.filter((snapshot) => snapshot.fellowship_id !== 0).map((snapshot) => [`${snapshot.fellowship_id}|${snapshot.item_key}`, Number(snapshot.quantity)]));
   const isAdditionalOrder = Boolean(cycle.additional_order_until);
   const grouped = new Map<string, { name: string; unit: string; quantities: Record<number, number>; total: number; addedFellowshipIds: number[] }>();
-  lineResult.results.forEach((line) => { const itemName = String(line.item_name); const variant = line.variant_name ? itemName === "白陽八卦符" ? `「${line.variant_name}」` : `(${line.variant_name})` : ""; const name = `${itemName}${variant}`; const key = `${line.item_code}|${name}|${line.unit}`; const row = grouped.get(key) ?? { name, unit: String(line.unit), quantities: {}, total: 0, addedFellowshipIds: [] }; const fellowshipId = Number(line.fellowship_id); const quantity = Number(line.quantity); row.quantities[fellowshipId] = (row.quantities[fellowshipId] || 0) + quantity; row.total += quantity; if (isAdditionalOrder && row.quantities[fellowshipId] > (snapshots.get(`${fellowshipId}|${additionalItemKey(line)}`) || 0) && !row.addedFellowshipIds.includes(fellowshipId)) row.addedFellowshipIds.push(fellowshipId); grouped.set(key, row); });
+  lineResult.results.forEach((line) => { const itemName = String(line.item_name); const variant = line.variant_name ? itemName === "白陽八卦符" ? `「${line.variant_name}」` : `(${line.variant_name})` : ""; const name = `${itemName}${variant}`; const key = `${line.item_code}|${name}|${line.unit}`; const row = grouped.get(key) ?? { name, unit: String(line.unit), quantities: {}, total: 0, addedFellowshipIds: [] }; const fellowshipId = Number(line.fellowship_id); const quantity = Number(line.quantity); row.quantities[fellowshipId] = (row.quantities[fellowshipId] || 0) + quantity; row.total += quantity; if (isAdditionalOrder && hasSnapshot && row.quantities[fellowshipId] > (snapshots.get(`${fellowshipId}|${additionalItemKey(line)}`) || 0) && !row.addedFellowshipIds.includes(fellowshipId)) row.addedFellowshipIds.push(fellowshipId); grouped.set(key, row); });
   return { cycle, fellowships: fellowshipsForPdf, rows: [...grouped.values()] };
 }
 
@@ -524,6 +525,7 @@ app.post("/api/admin/cycles/:id/additional-order", async (c) => {
     const statements = [
       c.env.DB.prepare("UPDATE order_cycles SET additional_order_until=?, updated_at=? WHERE id=?").bind(additionalOrderUntil, now(), cycleId),
       c.env.DB.prepare("DELETE FROM additional_order_snapshots WHERE order_cycle_id=?").bind(cycleId),
+      c.env.DB.prepare("INSERT INTO additional_order_snapshots (order_cycle_id, fellowship_id, item_key, quantity) VALUES (?, 0, '__snapshot_started__', 0)").bind(cycleId),
       ...snapshotRows.map((row) => c.env.DB.prepare("INSERT INTO additional_order_snapshots (order_cycle_id, fellowship_id, item_key, quantity) VALUES (?, ?, ?, ?)").bind(cycleId, row.fellowship_id, additionalItemKey(row), row.quantity))
     ];
     const result = await c.env.DB.batch(statements);

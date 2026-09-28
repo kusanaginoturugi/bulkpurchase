@@ -22,6 +22,7 @@ const jsonError = (message: string, status = 400) => new Response(JSON.stringify
 const now = () => new Date().toISOString();
 const displayName = (fellowship: { code: string; name: string }) => `${fellowship.code} ${fellowship.name}`;
 const normalize = (value: string) => value.replaceAll("　", " ").trim().toLocaleLowerCase();
+const normalizeItemSearch = (value: string) => value.replace(/^三期収円/, "三期収圓");
 
 function deadlineFromJapan(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) return null;
@@ -251,7 +252,7 @@ async function fellowships(env: Env) {
 app.get("/api/items", async (c) => {
   const query = (c.req.query("q") || "").replace(/[０-９]/g, (character) => String.fromCharCode(character.charCodeAt(0) - 65248)).trim();
   if (query.length < 2) return c.json({ items: [] });
-  const normalized = /^(灶君|竈君|そう君)/.test(query) ? "灶君護摩符" : query;
+  const normalized = /^(灶君|竈君|そう君)/.test(query) ? "灶君護摩符" : normalizeItemSearch(query);
   const rows = await c.env.DB.prepare("SELECT id, code, name, unit, special_handling_type FROM items WHERE active = 1 AND (code LIKE ? OR name LIKE ?) ORDER BY code LIMIT 20").bind(`${normalized}%`, `${normalized}%`).all<Item>();
   return c.json({ items: rows.results });
 });

@@ -403,13 +403,22 @@ app.put("/api/admin/cycles/:id", async (c) => {
   } catch (error) { return jsonError(error instanceof Error ? error.message : "注文サイクルを更新できませんでした。", 422); }
 });
 
+function additionalItemKey(item: Record<string, string | number | null>) {
+  return [item.item_code || "", item.item_name || "", item.variant_name || "", item.unit || ""].join("\u001f");
+}
+
 async function pdfData(env: Env, cycleId: number) {
   const cycle = await env.DB.prepare("SELECT * FROM order_cycles WHERE id = ?").bind(cycleId).first<Record<string, string | number>>();
   if (!cycle) throw new Error("注文サイクルが見つかりません。");
   const fellowshipsForPdf = (await env.DB.prepare("SELECT DISTINCT f.id, f.name, f.code FROM orders o JOIN fellowships f ON f.id=o.fellowship_id WHERE o.order_cycle_id=? AND o.status='submitted' ORDER BY f.code").bind(cycleId).all<{ id: number; name: string; code: string }>()).results;
-  const lines = (await env.DB.prepare("SELECT oi.item_code, oi.item_name, oi.variant_name, oi.unit, oi.quantity, o.fellowship_id FROM order_items oi JOIN orders o ON o.id=oi.order_id WHERE o.order_cycle_id=? AND o.status='submitted' ORDER BY oi.item_code, oi.item_name").bind(cycleId).all<Record<string, string | number | null>>()).results;
-  const grouped = new Map<string, { name: string; unit: string; quantities: Record<number, number>; total: number }>();
-  lines.forEach((line) => { const itemName = String(line.item_name); const variant = line.variant_name ? itemName === "白陽八卦符" ? `「${line.variant_name}」` : `(${line.variant_name})` : ""; const name = `${itemName}${variant}`; const key = `${line.item_code}|${name}|${line.unit}`; const row = grouped.get(key) ?? { name, unit: String(line.unit), quantities: {}, total: 0 }; const fellowshipId = Number(line.fellowship_id); const quantity = Number(line.quantity); row.quantities[fellowshipId] = (row.quantities[fellowshipId] || 0) + quantity; row.total += quantity; grouped.set(key, row); });
+  const [lineResult, snapshotResult] = await Promise.all([
+    env.DB.prepare("SELECT oi.item_code, oi.item_name, oi.variant_name, oi.unit, oi.quantity, o.fellowship_id FROM order_items oi JOIN orders o ON o.id=oi.order_id WHERE o.order_cycle_id=? AND o.status='submitted' ORDER BY oi.item_code, oi.item_name").bind(cycleId).all<Record<string, string | number | null>>(),
+    env.DB.prepare("SELECT fellowship_id, item_key, quantity FROM additional_order_snapshots WHERE order_cycle_id=?").bind(cycleId).all<{ fellowship_id: number; item_key: string; quantity: number }>()
+  ]);
+  const snapshots = new Map(snapshotResult.results.map((snapshot) => [`${snapshot.fellowship_id}|${snapshot.item_key}`, Number(snapshot.quantity)]));
+  const isAdditionalOrder = Boolean(cycle.additional_order_until);
+  const grouped = new Map<string, { name: string; unit: string; quantities: Record<number, number>; total: number; addedFellowshipIds: number[] }>();
+  lineResult.results.forEach((line) => { const itemName = String(line.item_name); const variant = line.variant_name ? itemName === "白陽八卦符" ? `「${line.variant_name}」` : `(${line.variant_name})` : ""; const name = `${itemName}${variant}`; const key = `${line.item_code}|${name}|${line.unit}`; const row = grouped.get(key) ?? { name, unit: String(line.unit), quantities: {}, total: 0, addedFellowshipIds: [] }; const fellowshipId = Number(line.fellowship_id); const quantity = Number(line.quantity); row.quantities[fellowshipId] = (row.quantities[fellowshipId] || 0) + quantity; row.total += quantity; if (isAdditionalOrder && row.quantities[fellowshipId] > (snapshots.get(`${fellowshipId}|${additionalItemKey(line)}`) || 0) && !row.addedFellowshipIds.includes(fellowshipId)) row.addedFellowshipIds.push(fellowshipId); grouped.set(key, row); });
   return { cycle, fellowships: fellowshipsForPdf, rows: [...grouped.values()] };
 }
 
@@ -511,8 +520,14 @@ app.post("/api/admin/cycles/:id/additional-order", async (c) => {
     const cycleId = Number(c.req.param("id"));
     if (!cycleId) return jsonError("注文サイクルが見つかりません。", 404);
     const additionalOrderUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-    const result = await c.env.DB.prepare("UPDATE order_cycles SET additional_order_until=?, updated_at=? WHERE id=?").bind(additionalOrderUntil, now(), cycleId).run();
-    if (!result.meta.changes) return jsonError("注文サイクルが見つかりません。", 404);
+    const snapshotRows = (await c.env.DB.prepare("SELECT o.fellowship_id, COALESCE(oi.item_code, '') AS item_code, oi.item_name, COALESCE(oi.variant_name, '') AS variant_name, oi.unit, SUM(oi.quantity) AS quantity FROM order_items oi JOIN orders o ON o.id=oi.order_id WHERE o.order_cycle_id=? AND o.status='submitted' GROUP BY o.fellowship_id, oi.item_code, oi.item_name, oi.variant_name, oi.unit").bind(cycleId).all<Record<string, string | number | null>>()).results;
+    const statements = [
+      c.env.DB.prepare("UPDATE order_cycles SET additional_order_until=?, updated_at=? WHERE id=?").bind(additionalOrderUntil, now(), cycleId),
+      c.env.DB.prepare("DELETE FROM additional_order_snapshots WHERE order_cycle_id=?").bind(cycleId),
+      ...snapshotRows.map((row) => c.env.DB.prepare("INSERT INTO additional_order_snapshots (order_cycle_id, fellowship_id, item_key, quantity) VALUES (?, ?, ?, ?)").bind(cycleId, row.fellowship_id, additionalItemKey(row), row.quantity))
+    ];
+    const result = await c.env.DB.batch(statements);
+    if (!result[0].meta.changes) return jsonError("注文サイクルが見つかりません。", 404);
     return c.json({ ok: true, additionalOrderUntil });
   } catch (error) { return jsonError(error instanceof Error ? error.message : "追加注文の受付を開始できませんでした。", 422); }
 });

@@ -413,12 +413,17 @@ async function pdfData(env: Env, cycleId: number) {
   return { cycle, fellowships: fellowshipsForPdf, rows: [...grouped.values()] };
 }
 
+function orderPdfFilename(cycle: Record<string, string | number>) {
+  const label = `${cycle.year}年${String(cycle.month).padStart(2, "0")}月`;
+  return `${cycle.additional_order_until ? "追加" : ""}【一括注文】${label}分@聖明王院.pdf`;
+}
+
 app.get("/api/admin/cycles/:id/pdf", async (c) => {
   try {
     requireAdmin(c);
     const data = await pdfData(c.env, Number(c.req.param("id")));
     const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: Boolean(data.cycle.additional_order_until), fellowships: data.fellowships, rows: data.rows }, c.env.BROWSER);
-    const filename = `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月_一括道具注文書.pdf`;
+    const filename = orderPdfFilename(data.cycle);
     return new Response(new Uint8Array(bytes).buffer, { headers: { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="bulk-order.pdf"; filename*=UTF-8''${encodeURIComponent(filename)}` } });
   } catch (error) { return c.text(error instanceof Error ? error.message : "PDFを出力できませんでした。", 422); }
 });
@@ -444,7 +449,7 @@ async function sendNotificationEmail(env: Env, cycleId: number, automatic = fals
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: env.RESEND_FROM, to: [env.TENDO_NOTIFICATION_EMAIL], subject: `【一括注文】${label}分`, html: `<p>${label}の道具一括注文書を添付します。</p>`, attachments: [{ filename: "一括道具注文書.pdf", content: toBase64(new Uint8Array(bytes)) }] })
+    body: JSON.stringify({ from: env.RESEND_FROM, to: [env.TENDO_NOTIFICATION_EMAIL], subject: `【一括注文】${label}分`, html: `<p>${label}の道具一括注文書を添付します。</p>`, attachments: [{ filename: orderPdfFilename(data.cycle), content: toBase64(new Uint8Array(bytes)) }] })
   });
   if (!response.ok) {
     const message = `通知メールの送信に失敗しました（HTTP ${response.status}）`;
@@ -461,7 +466,7 @@ async function sendTendoPdf(env: Env, cycleId: number, automatic = true) {
   const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: Boolean(data.cycle.additional_order_until), fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
   const form = new FormData();
   form.set("name", env.TENDO_SENDER_NAME); form.set("dendokai", env.TENDO_FELLOWSHIP_NAME); form.set("title", `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月 道具一括注文書`); form.set("text", "道具一括注文書を送信します。"); form.set(env.TENDO_DESTINATION || "mirokuji", "送信");
-  form.set("up_file[]", new File([new Uint8Array(bytes).buffer], "一括道具注文書.pdf", { type: "application/pdf" }));
+  form.set("up_file[]", new File([new Uint8Array(bytes).buffer], orderPdfFilename(data.cycle), { type: "application/pdf" }));
   const response = await fetch(env.TENDO_UPLOAD_URL, { method: "POST", body: form });
   if (!response.ok) {
     const message = `天道へのPDF送信に失敗しました（HTTP ${response.status}）`;

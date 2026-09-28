@@ -73,7 +73,7 @@ function orderPdfHtml(input: {
     @page { size: A4 landscape; margin: 11mm 10mm; }
     * { box-sizing: border-box; } html,body { margin:0; padding:0; color:#161616; background:#fff; }
     body { font-family:"Noto Serif JP","Yu Mincho",serif; } .sheet { width:100%; }
-    .title-line { position:relative; } h1 { margin:0; text-align:center; font-family:"Noto Sans JP",sans-serif; font-size:24pt; line-height:1.3; font-weight:700; letter-spacing:.04em; } .additional { position:absolute; left:0; top:-2mm; color:#a71d1d; font-family:"Noto Sans JP",sans-serif; font-size:32pt; line-height:1; font-weight:700; }
+    .title-line { position:relative; } h1 { margin:0; text-align:center; font-family:"Noto Sans JP",sans-serif; font-size:24pt; line-height:1.3; font-weight:700; letter-spacing:.04em; } .additional { position:absolute; left:0; top:0; color:#a71d1d; font-family:"Noto Sans JP",sans-serif; font-size:32pt; line-height:1; font-weight:700; }
     .meta { margin:2mm 0 3mm; display:flex; justify-content:space-between; align-items:center; font-family:"Noto Sans JP",sans-serif; font-size:15pt; font-weight:700; }
     table { width:100%; border-collapse:collapse; table-layout:fixed; border:1.2pt solid #242424; font-size:${tableFontSize}pt; }
     th,td { border:.55pt solid #333; vertical-align:middle; text-align:center; line-height:1.2; padding:1.1mm 1.2mm; }

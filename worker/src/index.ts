@@ -515,7 +515,10 @@ app.post("/api/admin/cycles/:id/tendo", async (c) => {
     if (!cycleId) return jsonError("注文サイクルが見つかりません。", 404);
     await sendTendoPdf(c.env, cycleId, false);
     await sendNotificationEmail(c.env, cycleId, false);
-    return c.json({ ok: true });
+    const cycle = await c.env.DB.prepare("SELECT additional_order_until FROM order_cycles WHERE id=?").bind(cycleId).first<{ additional_order_until: string | null }>();
+    const additionalOrderClosed = Boolean(cycle?.additional_order_until && new Date(cycle.additional_order_until) > new Date());
+    if (additionalOrderClosed) await c.env.DB.prepare("UPDATE order_cycles SET additional_order_until=NULL, updated_at=? WHERE id=?").bind(now(), cycleId).run();
+    return c.json({ ok: true, additionalOrderClosed });
   } catch (error) { return jsonError(error instanceof Error ? error.message : "天道への再送信に失敗しました。", 422); }
 });
 

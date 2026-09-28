@@ -256,6 +256,35 @@ app.get("/api/items", async (c) => {
   return c.json({ items: rows.results });
 });
 
+function itemMasterInput(body: Record<string, unknown>) {
+  const code = String(body.code || "").trim();
+  const name = String(body.name || "").trim();
+  const unit = String(body.unit || "").trim();
+  if (!code || !name || !unit || code.length > 40 || name.length > 100 || unit.length > 20) throw new Error("コード・名称・単位を正しく入力してください。");
+  return { code, name, unit };
+}
+
+app.post("/api/admin/items", async (c) => {
+  try {
+    requireAdmin(c); requireCsrf(c);
+    const item = itemMasterInput(await c.req.json<Record<string, unknown>>());
+    await c.env.DB.prepare("INSERT INTO items (code, name, unit, created_at, updated_at) VALUES (?, ?, ?, ?, ?)").bind(item.code, item.name, item.unit, now(), now()).run();
+    return c.json({ ok: true });
+  } catch (error) { return jsonError(error instanceof Error ? error.message : "道具を追加できませんでした。", 422); }
+});
+
+app.put("/api/admin/items/:id", async (c) => {
+  try {
+    requireAdmin(c); requireCsrf(c);
+    const itemId = Number(c.req.param("id"));
+    const item = itemMasterInput(await c.req.json<Record<string, unknown>>());
+    if (!itemId) return jsonError("道具が見つかりません。", 404);
+    const result = await c.env.DB.prepare("UPDATE items SET code=?, name=?, unit=?, updated_at=? WHERE id=?").bind(item.code, item.name, item.unit, now(), itemId).run();
+    if (!result.meta.changes) return jsonError("道具が見つかりません。", 404);
+    return c.json({ ok: true });
+  } catch (error) { return jsonError(error instanceof Error ? error.message : "道具を更新できませんでした。", 422); }
+});
+
 app.get("/api/current-order", async (c) => {
   const loggedInUser = user(c);
   const cycle = await currentCycle(c.env);

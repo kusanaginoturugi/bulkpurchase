@@ -240,7 +240,7 @@ app.get("/admin", (c) => user(c).role === "admin" ? c.html(renderPage(user(c), "
 
 async function currentCycle(env: Env) {
   const nowValue = now();
-  return env.DB.prepare("SELECT * FROM order_cycles WHERE status != 'sent' AND (deadline_at >= ? OR additional_order_until >= ?) ORDER BY CASE WHEN deadline_at >= ? THEN 0 ELSE 1 END, deadline_at ASC LIMIT 1").bind(nowValue, nowValue, nowValue).first<Record<string, string | number | null>>();
+  return env.DB.prepare("SELECT * FROM order_cycles WHERE status != 'sent' AND (deadline_at >= ? OR additional_order_until >= ?) ORDER BY CASE WHEN additional_order_until >= ? AND deadline_at < ? THEN 0 ELSE 1 END, deadline_at ASC LIMIT 1").bind(nowValue, nowValue, nowValue, nowValue).first<Record<string, string | number | null>>();
 }
 
 async function fellowships(env: Env) {

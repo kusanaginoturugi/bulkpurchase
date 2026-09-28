@@ -53,6 +53,7 @@ function orderPdfHtml(input: {
   label: string;
   orderDate: string;
   arrivalDate: string;
+  isAdditionalOrder?: boolean;
   fellowships: PdfFellowship[];
   rows: PdfRow[];
 }) {
@@ -72,14 +73,14 @@ function orderPdfHtml(input: {
     @page { size: A4 landscape; margin: 11mm 10mm; }
     * { box-sizing: border-box; } html,body { margin:0; padding:0; color:#161616; background:#fff; }
     body { font-family:"Noto Serif JP","Yu Mincho",serif; } .sheet { width:100%; }
-    h1 { margin:0; text-align:center; font-family:"Noto Sans JP",sans-serif; font-size:24pt; line-height:1.3; font-weight:700; letter-spacing:.04em; }
+    .title-line { position:relative; } h1 { margin:0; text-align:center; font-family:"Noto Sans JP",sans-serif; font-size:24pt; line-height:1.3; font-weight:700; letter-spacing:.04em; } .additional { position:absolute; right:0; top:-1mm; color:#a71d1d; font-family:"Noto Sans JP",sans-serif; font-size:27pt; line-height:1; font-weight:700; }
     .meta { margin:2mm 0 3mm; display:flex; justify-content:space-between; align-items:center; font-family:"Noto Sans JP",sans-serif; font-size:15pt; font-weight:700; }
     table { width:100%; border-collapse:collapse; table-layout:fixed; border:1.2pt solid #242424; font-size:${tableFontSize}pt; }
     th,td { border:.55pt solid #333; vertical-align:middle; text-align:center; line-height:1.2; padding:1.1mm 1.2mm; }
     th { background:#f2f0ec; height:${rowHeight + 3}mm; font-size:${headerFontSize}pt; font-weight:700; } td { height:${rowHeight}mm; } th:first-child,td.item { width:31%; }
     th:last-child,td.total { width:8%; } td.item { padding:1.2mm 3mm; font-size:${tableFontSize}pt; white-space:nowrap; } table.item-label { display:inline-table; width:auto; border:0; font:inherit; } table.item-label td { width:auto; height:auto; border:0; padding:0; font:inherit; white-space:nowrap; } table.item-label td.variant { font-family:"Noto Sans JP",sans-serif; font-weight:700; } td.total { font-family:"Noto Sans JP",sans-serif; font-weight:700; }
     tr { break-inside:avoid; } .empty { height:25mm; color:#555; } .footer { margin-top:3mm; text-align:right; font-family:"Noto Sans JP",sans-serif; font-size:8.5pt; color:#555; }
-  </style></head><body><main class="sheet"><h1>聖明王院　一括道具注文書</h1><div class="meta"><span>注文日　${escapeHtml(monthDay(input.orderDate))}</span><span>${escapeHtml(arrivalLabel)}</span></div><table><thead><tr><th>道具名</th>${headers}<th>合計</th></tr></thead><tbody>${rows}</tbody></table><div class="footer">聖明王院 道具一括注文</div></main></body></html>`;
+  </style></head><body><main class="sheet"><div class="title-line"><h1>聖明王院　一括道具注文書</h1>${input.isAdditionalOrder ? '<strong class="additional">追加</strong>' : ""}</div><div class="meta"><span>注文日　${escapeHtml(monthDay(input.orderDate))}</span><span>${escapeHtml(arrivalLabel)}</span></div><table><thead><tr><th>道具名</th>${headers}<th>合計</th></tr></thead><tbody>${rows}</tbody></table><div class="footer">聖明王院 道具一括注文</div></main></body></html>`;
 }
 
 async function createStyledOrderPdf(browser: BrowserRun, input: Parameters<typeof orderPdfHtml>[0]) {
@@ -96,6 +97,7 @@ export async function createOrderPdf(input: {
   label: string;
   orderDate: string;
   arrivalDate: string;
+  isAdditionalOrder?: boolean;
   fellowships: PdfFellowship[];
   rows: PdfRow[];
 }, browser?: BrowserRun) {
@@ -129,6 +131,7 @@ export async function createOrderPdf(input: {
   const weekday = ["日", "月", "火", "水", "木", "金", "土"][date.getUTCDay()];
   const arrivalLabel = `${date.getUTCMonth() + 1}月${date.getUTCDate()}日(${weekday})　弥勒大仏殿必着`;
   text("聖明王院　一括道具注文書", margin, y, 22, "center", width - margin * 2);
+  if (input.isAdditionalOrder) text("追加", margin, y, 25, "right", width - margin * 2);
   y -= 32;
   text(`注文日　${monthDay(input.orderDate)}`, margin, y, 15, "left");
   text(arrivalLabel, margin, y, 15, "right", width - margin * 2);

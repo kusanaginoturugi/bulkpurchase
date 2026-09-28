@@ -417,7 +417,7 @@ app.get("/api/admin/cycles/:id/pdf", async (c) => {
   try {
     requireAdmin(c);
     const data = await pdfData(c.env, Number(c.req.param("id")));
-    const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), fellowships: data.fellowships, rows: data.rows }, c.env.BROWSER);
+    const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: Boolean(data.cycle.additional_order_until), fellowships: data.fellowships, rows: data.rows }, c.env.BROWSER);
     const filename = `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月_一括道具注文書.pdf`;
     return new Response(new Uint8Array(bytes).buffer, { headers: { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="bulk-order.pdf"; filename*=UTF-8''${encodeURIComponent(filename)}` } });
   } catch (error) { return c.text(error instanceof Error ? error.message : "PDFを出力できませんでした。", 422); }
@@ -440,7 +440,7 @@ async function sendNotificationEmail(env: Env, cycleId: number, automatic = fals
   if (!env.RESEND_API_KEY || !env.RESEND_FROM) throw new Error("通知メールの送信設定がまだ完了していません。");
   const data = await pdfData(env, cycleId);
   const label = `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`;
-  const bytes = await createOrderPdf({ label, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
+  const bytes = await createOrderPdf({ label, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: Boolean(data.cycle.additional_order_until), fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
@@ -458,7 +458,7 @@ async function sendNotificationEmail(env: Env, cycleId: number, automatic = fals
 
 async function sendTendoPdf(env: Env, cycleId: number, automatic = true) {
   const data = await pdfData(env, cycleId);
-  const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
+  const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: Boolean(data.cycle.additional_order_until), fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
   const form = new FormData();
   form.set("name", env.TENDO_SENDER_NAME); form.set("dendokai", env.TENDO_FELLOWSHIP_NAME); form.set("title", `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月 道具一括注文書`); form.set("text", "道具一括注文書を送信します。"); form.set(env.TENDO_DESTINATION || "mirokuji", "送信");
   form.set("up_file[]", new File([new Uint8Array(bytes).buffer], "一括道具注文書.pdf", { type: "application/pdf" }));

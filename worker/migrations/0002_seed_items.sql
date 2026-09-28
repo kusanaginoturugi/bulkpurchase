@@ -8,12 +8,12 @@ INSERT INTO items (code, name, value, refund, unit, special_handling_type, activ
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("105001", "三會龍華之御柱", 500, 50, "本", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("105002", "三會以外のHP", 500, 0, "枚", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("108000", "三期滅劫之霊木", 800, 100, "本", "none", 1);
-INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("120001", "有気界之御柱", 2000, 300, "本", "none", 1);
+INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("120001", "有気界平定之御柱", 2000, 300, "本", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("120002", "八大明王如意棒", 2000, 800, "本", "none", 1);
-INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("120003", "気天界之御柱", 2000, 300, "本", "none", 1);
-INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("120004", "象天界之御柱", 2000, 300, "本", "none", 1);
-INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("120005", "地獄界之御柱", 2000, 300, "本", "none", 1);
-INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("120006", "地上餓鬼界之御柱", 2000, 300, "本", "none", 1);
+INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("120003", "気天界平定之御柱", 2000, 300, "本", "none", 1);
+INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("120004", "象天界平定之御柱", 2000, 300, "本", "none", 1);
+INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("120005", "地獄界平定之御柱", 2000, 300, "本", "none", 1);
+INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("120006", "地上餓鬼界平定之御柱", 2000, 300, "本", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("130001", "龍樹滅業棒", 3000, 1200, "本", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("130002", "北斗施餓鬼供養護摩木", 3000, 0, "本", "none", 1);
 INSERT INTO items (code, name, value, refund, unit, special_handling_type, active) VALUES ("200051", "免罪符", 5, 0, "枚", "none", 1);

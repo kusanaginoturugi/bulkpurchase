@@ -22,7 +22,15 @@ const jsonError = (message: string, status = 400) => new Response(JSON.stringify
 const now = () => new Date().toISOString();
 const displayName = (fellowship: { code: string; name: string }) => `${fellowship.code} ${fellowship.name}`;
 const normalize = (value: string) => value.replaceAll("　", " ").trim().toLocaleLowerCase();
-const normalizeItemSearch = (value: string) => value.replace(/^三期収円/, "三期収圓");
+const itemSearchAliases = [
+  ["三期収円", "三期収圓"],
+  ["お陰", "おかげ"],
+  ["弥勒鵺", "みろく鵺"]
+];
+const normalizeItemSearch = (value: string) => {
+  const alias = itemSearchAliases.find(([from]) => value.startsWith(from));
+  return alias ? `${alias[1]}${value.slice(alias[0].length)}` : value;
+};
 
 function deadlineFromJapan(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) return null;

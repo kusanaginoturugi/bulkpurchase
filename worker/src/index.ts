@@ -428,6 +428,10 @@ function orderPdfFilename(cycle: Record<string, string | number>) {
   return `${cycle.additional_order_until ? "追加" : ""}【一括注文】${label}分@聖明王院.pdf`;
 }
 
+function orderEmailSubject(cycle: Record<string, string | number>) {
+  return `${cycle.additional_order_until ? "追加" : ""}【一括注文】${cycle.year}年${String(cycle.month).padStart(2, "0")}月分`;
+}
+
 app.get("/api/admin/cycles/:id/pdf", async (c) => {
   try {
     requireAdmin(c);
@@ -459,7 +463,7 @@ async function sendNotificationEmail(env: Env, cycleId: number, automatic = fals
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: env.RESEND_FROM, to: [env.TENDO_NOTIFICATION_EMAIL], subject: `【一括注文】${label}分`, html: `<p>${label}の道具一括注文書を添付します。</p>`, attachments: [{ filename: orderPdfFilename(data.cycle), content: toBase64(new Uint8Array(bytes)) }] })
+    body: JSON.stringify({ from: env.RESEND_FROM, to: [env.TENDO_NOTIFICATION_EMAIL], subject: orderEmailSubject(data.cycle), html: `<p>${label}の道具一括注文書を添付します。</p>`, attachments: [{ filename: orderPdfFilename(data.cycle), content: toBase64(new Uint8Array(bytes)) }] })
   });
   if (!response.ok) {
     const message = `通知メールの送信に失敗しました（HTTP ${response.status}）`;

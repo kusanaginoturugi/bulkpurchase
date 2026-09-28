@@ -331,13 +331,15 @@ app.put("/api/current-order", async (c) => {
       if (!itemName && !quantity) continue;
       const itemId = entry.itemId ? Number(entry.itemId) : null;
       const item = itemId ? await c.env.DB.prepare("SELECT id, code, name, unit, special_handling_type FROM items WHERE id = ? AND active = 1").bind(itemId).first<Item>() : null;
-      const unit = fixedUnits[itemName] || item?.unit || String(entry.unit || "").trim();
+      if (!item) return jsonError(`「${itemName}」は候補から選択してください。`, 422);
+      const resolvedName = item.name;
+      const unit = fixedUnits[resolvedName] || item.unit;
       const variantName = String(entry.variantName || "").trim();
       const needsVariant = item?.code === "201002";
-      const selectionVariants = item?.code === "210001" || /灶君|そう君/.test(itemName) || item?.code === "205002" || itemName.includes("四神獣符");
-      if (!itemName || !Number.isInteger(quantity) || quantity <= 0 || !unit) return jsonError("道具名・数量・単位を正しく入力してください。", 422);
+      const selectionVariants = item.code === "210001" || /灶君|そう君/.test(resolvedName) || item.code === "205002" || resolvedName.includes("四神獣符");
+      if (!Number.isInteger(quantity) || quantity <= 0 || !unit) return jsonError("道具名・数量・単位を正しく入力してください。", 422);
       if ((needsVariant || selectionVariants) && !variantName) return jsonError("種別を入力してください。", 422);
-      normalizedItems.push({ itemId: item?.id || null, itemCode: item?.code || String(entry.itemCode || "") || null, itemName: item?.name || itemName, variantName, quantity, unit, sortOrder: index });
+      normalizedItems.push({ itemId: item.id, itemCode: item.code, itemName: resolvedName, variantName, quantity, unit, sortOrder: index });
     }
     if (submitting && normalizedItems.length === 0) return jsonError("提出時は道具を1件以上入力してください。", 422);
     const existing = await c.env.DB.prepare("SELECT id, status FROM orders WHERE order_cycle_id = ? AND fellowship_id = ?").bind(cycle.id, fellowship.id).first<{ id: number; status: string }>();

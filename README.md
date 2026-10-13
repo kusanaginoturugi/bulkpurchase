@@ -9,6 +9,7 @@ Cloudflare Workers + D1 で動く注文集約アプリです。本番入口は
 - `edge-proxy/`: 独自ドメインから本体 Worker への中継
 - `worker/README.md`: 開発、設定、デプロイ手順
 - `docs/rails-retirement.md`: Rails 版の廃止状況とデータ保全の確認項目
+- `docs/dependency-updates.md`: Dependabot 更新 PR の運用
 
 ## ローカル確認
 

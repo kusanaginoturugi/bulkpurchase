@@ -1,79 +1,56 @@
-# Cloudflare Workers版
+# Cloudflare Workers 版
 
-このディレクトリは、EC2上のRailsを置き換えるWorkers + D1版です。
+注文画面・API・PDF 生成・定期送信を提供する本体 Worker です。D1 は
+`bulkpurchase-db`、本番 URL は `https://bulkpurchase.showway.biz/` です。
+独自ドメインのリクエストは `edge-proxy/` が中継します。
 
-## 構成
-
-- Worker: `bulkpurchase-worker`
-- D1: `bulkpurchase-db`（APAC）
-- ログイン: Authentik OAuth2 / OpenID Connect
-- 定期実行: 1分ごとのCronでPDF自動送信を確認
-
-本番URLは次です。Authentikログインと注文入力は、このURLから行います。
-
-```text
-https://bulkpurchase.showway.biz/
-```
-
-本体WorkerのURLは次です。D1データベースと本体Workerは、D1を作成済みの
-Cloudflareアカウントにあります。
-
-```text
-https://bulkpurchase-worker.myouougoma.workers.dev/health
-```
-
-## 初回設定
+## 開発と確認
 
 ```bash
 cd worker
+npm ci
 cp .dev.vars.example .dev.vars
-npm install
-npm run d1:migrate:remote
+npm run d1:migrate:local
+npm run dev
+npm run check
+npx wrangler deploy --dry-run
+npx wrangler deploy --dry-run --config ../edge-proxy/wrangler.jsonc
 ```
 
-CloudflareのWorker秘密値として、次を設定します。値はGitHubの既存秘密設定から引き継ぎます。
+`.dev.vars` はローカル用で、Git に含めません。
+
+## 本番設定とデプロイ
+
+`wrangler.jsonc` に本体 Worker と D1 の接続先があります。`edge-proxy/wrangler.jsonc`
+には独自ドメインの設定があります。両 Worker は別の Cloudflare アカウントです。
+デプロイ前に対象アカウントを確認してください。
+
+本体 Worker には `AUTHENTIK_CLIENT_SECRET` と `SESSION_SECRET` が必要です。
+通知メールを使う場合は `RESEND_API_KEY` と `RESEND_FROM` も設定します。
+秘密値は Wrangler Secret に保管します。
 
 ```bash
-npx wrangler secret put AUTHENTIK_CLIENT_SECRET
-npx wrangler secret put SESSION_SECRET
-# 通知メールを使う場合だけ設定
-npx wrangler secret put RESEND_API_KEY
-npx wrangler secret put RESEND_FROM
-```
-
-既存の Authentik プロバイダにはすでに次のURLが登録されています。このURLは
-Worker版でも継続して利用するため、本番切替のためにプロバイダを作り直す必要は
-ありません。
-
-```text
-https://bulkpurchase.showway.biz/session/authentik/callback
-```
-
-Workers の確認用URLでログイン動作まで確認する場合だけ、次のURLを追加します。
-
-```text
-https://bulkpurchase-worker.<workers.devのサブドメイン>/auth/callback
-```
-
-## Railsデータの移行
-
-Railsサーバー上で出力し、Cloudflareへ適用します。
-
-```bash
-RAILS_ENV=production bin/rails runner script/export_d1_data.rb > /tmp/rails-data.sql
 cd worker
-./scripts/import-rails-data.sh /tmp/rails-data.sql
+npm run d1:migrate:remote
+npm run deploy
+npx wrangler deploy --config ../edge-proxy/wrangler.jsonc
 ```
 
-## 独自ドメインの中継
+Authentik の登録済み戻り先は
+`https://bulkpurchase.showway.biz/session/authentik/callback` です。
+本体 Worker の確認用 URL は
+`https://bulkpurchase-worker.myouougoma.workers.dev/health` です。
 
-`showway.biz` のゾーンとD1を保有するアカウントが異なるため、`edge-proxy/` の
-`bulkpurchase-edge` が `bulkpurchase.showway.biz` のカスタムドメインを受け、本体
-Workerへ中継します。これにより、D1データを複製せずに独自ドメインで運用できます。
+## データ保全
+
+本番 D1 のエクスポート例。ファイルには注文と個人情報が含まれるため、Git 管理外の
+安全な場所に置いてください。
 
 ```bash
-npx --prefix worker wrangler deploy --config edge-proxy/wrangler.jsonc
+cd worker
+mkdir -p ../backups
+npx wrangler d1 export bulkpurchase-db --remote --output ../backups/bulkpurchase-db.sql
 ```
 
-カスタムドメインを使うため、同じホスト名のDNS CNAMEレコードは作成しません。切替後は
-EC2のRailsサービスを停止できます。
+Rails 版は廃止作業中です。旧ソースと移行用スクリプトは Git コミット `9e39fe9` にあります。
+廃止の進捗と本番での確認項目は `docs/rails-retirement.md` を参照してください。

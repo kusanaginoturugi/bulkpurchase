@@ -10,6 +10,7 @@ Cloudflare Workers + D1 で動く注文集約アプリです。本番入口は
 - `worker/README.md`: 開発、設定、デプロイ手順
 - `docs/rails-retirement.md`: Rails 版の廃止状況とデータ保全の確認項目
 - `docs/dependency-updates.md`: Dependabot 更新 PR の運用
+- `docs/security-maintenance.md`: 脆弱性点検と対策の記録
 
 ## ローカル確認
 

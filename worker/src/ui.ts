@@ -1,8 +1,8 @@
 import type { SessionUser } from "./types";
 
-const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character] ?? character);
+export const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character] ?? character);
 
-export function renderPage(user: SessionUser, view: "current" | "history" | "admin") {
+export function renderPage(user: SessionUser, view: "current" | "history" | "admin", nonce: string) {
   const title = view === "current" ? "現在の注文" : view === "history" ? "履歴" : "管理";
   const navigation = [
     `<a href="/current-order">現在の注文</a>`,
@@ -19,7 +19,7 @@ export function renderPage(user: SessionUser, view: "current" | "history" | "adm
 </style></head><body>
 <header><div><div class="eyebrow">BULK ORDER</div><div class="brand">聖明王院道具一括注文</div></div><nav class="nav"><span class="identity">${escapeHtml(user.fellowshipCode)} ${escapeHtml(user.fellowshipName)} / ${escapeHtml(user.name)}</span>${navigation}</nav></header>
 <main class="shell"><div id="notice" class="notice"></div><div id="app"></div></main>
-<script>window.__BULK__=${JSON.stringify({ view, csrf: user.csrfToken, admin: user.role === "admin" }).replace(/</g, "\\u003c")}</script><script type="module">
+<script nonce="${nonce}">window.__BULK__=${JSON.stringify({ view, csrf: user.csrfToken, admin: user.role === "admin" }).replace(/</g, "\\u003c")}</script><script type="module" nonce="${nonce}">
 const state=window.__BULK__,app=document.querySelector('#app'),notice=document.querySelector('#notice');
 const api=async(path,options={})=>{const response=await fetch(path,{headers:{'Content-Type':'application/json','X-CSRF-Token':state.csrf,...options.headers},...options});const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(body.error||'処理に失敗しました。');return body};
 const esc=(s='')=>String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));

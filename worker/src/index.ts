@@ -1,11 +1,12 @@
 import { Hono, type Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
+import { NONCE, secureHeaders } from "hono/secure-headers";
 
 import { createOrderPdf } from "./pdf";
 import type { Env, Fellowship, Item, SessionUser } from "./types";
-import { renderPage } from "./ui";
+import { escapeHtml, renderPage } from "./ui";
 
-type AppBindings = { Bindings: Env; Variables: { user: SessionUser } };
+type AppBindings = { Bindings: Env; Variables: { user: SessionUser; secureHeadersNonce?: string } };
 
 const app = new Hono<AppBindings>();
 const managedCodes = ["31101", "31201", "31303", "31304", "31305", "31407", "31901", "32204", "32205", "99300"];
@@ -99,7 +100,16 @@ async function verifiedValue(value: string | undefined, secret: string) {
   const data = value.slice(0, separator);
   const signature = value.slice(separator + 1);
   const expected = await sign(data, secret);
-  return signature === expected ? data : null;
+  return safeEqual(signature, expected) ? data : null;
+}
+
+function safeEqual(left: string, right: string) {
+  const a = new TextEncoder().encode(left);
+  const b = new TextEncoder().encode(right);
+  if (a.byteLength !== b.byteLength) return false;
+  let difference = 0;
+  a.forEach((byte, index) => { difference |= byte ^ b[index]; });
+  return difference === 0;
 }
 
 async function userFromSession(env: Env, sessionId?: string): Promise<SessionUser | null> {
@@ -110,6 +120,27 @@ async function userFromSession(env: Env, sessionId?: string): Promise<SessionUse
       WHERE s.id = ? AND s.expires_at > ? AND u.active = 1`).bind(sessionId, now()).first<SessionUser>();
   return row ?? null;
 }
+
+// 画面のinline scriptはリクエストごとのnonceで許可する。styleはui.tsが動的に追加するためinlineを許可する。
+app.use("*", secureHeaders({
+  contentSecurityPolicy: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'", NONCE],
+    styleSrc: ["'self'", "'unsafe-inline'"],
+    imgSrc: ["'self'", "data:"],
+    fontSrc: ["'self'", "data:"],
+    connectSrc: ["'self'"],
+    objectSrc: ["'none'"],
+    baseUri: ["'self'"],
+    formAction: ["'self'"],
+    frameAncestors: ["'none'"],
+    upgradeInsecureRequests: []
+  },
+  xFrameOptions: "DENY",
+  referrerPolicy: "strict-origin-when-cross-origin",
+  strictTransportSecurity: "max-age=31536000",
+  permissionsPolicy: { camera: [], microphone: [], geolocation: [], payment: [], usb: [] }
+}));
 
 app.use("*", async (c, next) => {
   const path = new URL(c.req.url).pathname;
@@ -132,7 +163,7 @@ function requireAdmin(c: { get(name: "user"): SessionUser }) {
 }
 
 function requireCsrf(c: { req: { header(name: string): string | undefined }; get(name: "user"): SessionUser }) {
-  if (c.req.header("X-CSRF-Token") !== user(c).csrfToken) throw new Error("操作の確認に失敗しました。画面を再読み込みしてください。");
+  if (!safeEqual(c.req.header("X-CSRF-Token") ?? "", user(c).csrfToken)) throw new Error("操作の確認に失敗しました。画面を再読み込みしてください。");
 }
 
 async function oidcConfiguration(env: Env) {
@@ -175,7 +206,7 @@ app.get("/login", async (c) => {
     }).toString();
     return c.redirect(authorization.toString());
   } catch (error) {
-    return c.html(`<p>Authentikでログインできません。${error instanceof Error ? error.message : ""}</p>`, 500);
+    return c.html(`<p>Authentikでログインできません。${error instanceof Error ? escapeHtml(error.message) : ""}</p>`, 500);
   }
 });
 
@@ -228,7 +259,7 @@ const handleAuthentikCallback = async (c: Context<AppBindings>) => {
     setCookie(c, "bp_session", sessionId, { httpOnly: true, secure: true, sameSite: "Lax", path: "/", maxAge: 60 * 60 * 24 * 30 });
     return c.redirect("/current-order");
   } catch (error) {
-    return c.html(`Authentikログインに失敗しました。${error instanceof Error ? error.message : ""}`, 500);
+    return c.html(`Authentikログインに失敗しました。${error instanceof Error ? escapeHtml(error.message) : ""}`, 500);
   }
 };
 
@@ -243,9 +274,9 @@ app.get("/logout", async (c) => {
 });
 
 app.get("/", (c) => c.redirect("/current-order"));
-app.get("/current-order", (c) => c.html(renderPage(user(c), "current")));
-app.get("/orders", (c) => c.html(renderPage(user(c), "history")));
-app.get("/admin", (c) => user(c).role === "admin" ? c.html(renderPage(user(c), "admin")) : c.text("管理者のみ利用できます。", 403));
+app.get("/current-order", (c) => c.html(renderPage(user(c), "current", c.get("secureHeadersNonce") ?? "")));
+app.get("/orders", (c) => c.html(renderPage(user(c), "history", c.get("secureHeadersNonce") ?? "")));
+app.get("/admin", (c) => user(c).role === "admin" ? c.html(renderPage(user(c), "admin", c.get("secureHeadersNonce") ?? "")) : c.text("管理者のみ利用できます。", 403));
 
 async function currentCycle(env: Env) {
   const nowValue = now();

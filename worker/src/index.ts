@@ -478,6 +478,10 @@ function additionalItemKey(item: Record<string, string | number | null>) {
   return [item.item_code || "", item.item_name || "", item.variant_name || "", item.unit || ""].join("\u001f");
 }
 
+function isAdditionalPdf(cycle: Record<string, string | number | null>) {
+  return Boolean(cycle.additional_order_until && cycle.tendo_sent_at);
+}
+
 async function pdfData(env: Env, cycleId: number) {
   const cycle = await env.DB.prepare("SELECT * FROM order_cycles WHERE id = ?").bind(cycleId).first<Record<string, string | number>>();
   if (!cycle) throw new Error("注文サイクルが見つかりません。");
@@ -488,7 +492,7 @@ async function pdfData(env: Env, cycleId: number) {
   ]);
   const hasSnapshot = snapshotResult.results.some((snapshot) => snapshot.fellowship_id === 0 && snapshot.item_key === "__snapshot_started__");
   const snapshots = new Map(snapshotResult.results.filter((snapshot) => snapshot.fellowship_id !== 0).map((snapshot) => [`${snapshot.fellowship_id}|${snapshot.item_key}`, Number(snapshot.quantity)]));
-  const isAdditionalOrder = Boolean(cycle.additional_order_until);
+  const isAdditionalOrder = isAdditionalPdf(cycle);
   const grouped = new Map<string, { name: string; unit: string; quantities: Record<number, number>; total: number; addedFellowshipIds: number[] }>();
   lineResult.results.forEach((line) => { const itemName = String(line.item_name); const variant = line.variant_name ? itemName === "白陽八卦符" ? `「${line.variant_name}」` : `(${line.variant_name})` : ""; const name = `${itemName}${variant}`; const key = `${line.item_code}|${name}|${line.unit}`; const row = grouped.get(key) ?? { name, unit: String(line.unit), quantities: {}, total: 0, addedFellowshipIds: [] }; const fellowshipId = Number(line.fellowship_id); const quantity = Number(line.quantity); row.quantities[fellowshipId] = (row.quantities[fellowshipId] || 0) + quantity; row.total += quantity; if (isAdditionalOrder && hasSnapshot && row.quantities[fellowshipId] > (snapshots.get(`${fellowshipId}|${additionalItemKey(line)}`) || 0) && !row.addedFellowshipIds.includes(fellowshipId)) row.addedFellowshipIds.push(fellowshipId); grouped.set(key, row); });
   return { cycle, fellowships: fellowshipsForPdf, rows: [...grouped.values()] };
@@ -496,18 +500,18 @@ async function pdfData(env: Env, cycleId: number) {
 
 function orderPdfFilename(cycle: Record<string, string | number>) {
   const label = `${cycle.year}年${String(cycle.month).padStart(2, "0")}月`;
-  return `${cycle.additional_order_until ? "追加" : ""}【一括注文】${label}分@聖明王院.pdf`;
+  return `${isAdditionalPdf(cycle) ? "追加" : ""}【一括注文】${label}分@聖明王院.pdf`;
 }
 
 function orderEmailSubject(cycle: Record<string, string | number>) {
-  return `${cycle.additional_order_until ? "追加" : ""}【一括注文】${cycle.year}年${String(cycle.month).padStart(2, "0")}月分`;
+  return `${isAdditionalPdf(cycle) ? "追加" : ""}【一括注文】${cycle.year}年${String(cycle.month).padStart(2, "0")}月分`;
 }
 
 app.get("/api/admin/cycles/:id/pdf", async (c) => {
   try {
     requireAdmin(c);
     const data = await pdfData(c.env, Number(c.req.param("id")));
-    const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: Boolean(data.cycle.additional_order_until), fellowships: data.fellowships, rows: data.rows }, c.env.BROWSER);
+    const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: isAdditionalPdf(data.cycle), fellowships: data.fellowships, rows: data.rows }, c.env.BROWSER);
     const filename = orderPdfFilename(data.cycle);
     return new Response(new Uint8Array(bytes).buffer, { headers: { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="bulk-order.pdf"; filename*=UTF-8''${encodeURIComponent(filename)}` } });
   } catch (error) { return c.text(error instanceof Error ? error.message : "PDFを出力できませんでした。", 422); }
@@ -530,7 +534,7 @@ async function sendNotificationEmail(env: Env, cycleId: number, automatic = fals
   if (!env.RESEND_API_KEY || !env.RESEND_FROM) throw new Error("通知メールの送信設定がまだ完了していません。");
   const data = await pdfData(env, cycleId);
   const label = `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`;
-  const bytes = await createOrderPdf({ label, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: Boolean(data.cycle.additional_order_until), fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
+  const bytes = await createOrderPdf({ label, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: isAdditionalPdf(data.cycle), fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
@@ -548,7 +552,7 @@ async function sendNotificationEmail(env: Env, cycleId: number, automatic = fals
 
 async function sendTendoPdf(env: Env, cycleId: number, automatic = true) {
   const data = await pdfData(env, cycleId);
-  const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: Boolean(data.cycle.additional_order_until), fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
+  const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: isAdditionalPdf(data.cycle), fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
   const form = new FormData();
   form.set("name", env.TENDO_SENDER_NAME); form.set("dendokai", env.TENDO_FELLOWSHIP_NAME); form.set("title", `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月 道具一括注文書`); form.set("text", "道具一括注文書を送信します。"); form.set(env.TENDO_DESTINATION || "mirokuji", "送信");
   form.set("up_file[]", new File([new Uint8Array(bytes).buffer], orderPdfFilename(data.cycle), { type: "application/pdf" }));

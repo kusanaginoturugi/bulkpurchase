@@ -498,13 +498,13 @@ async function pdfData(env: Env, cycleId: number) {
   return { cycle, fellowships: fellowshipsForPdf, rows: [...grouped.values()] };
 }
 
-function orderPdfFilename(cycle: Record<string, string | number>) {
+function orderPdfFilename(cycle: Record<string, string | number>, isAdditionalOrder = isAdditionalPdf(cycle)) {
   const label = `${cycle.year}年${String(cycle.month).padStart(2, "0")}月`;
-  return `${isAdditionalPdf(cycle) ? "追加" : ""}【一括注文】${label}分@聖明王院.pdf`;
+  return `${isAdditionalOrder ? "追加" : ""}【一括注文】${label}分@聖明王院.pdf`;
 }
 
-function orderEmailSubject(cycle: Record<string, string | number>) {
-  return `${isAdditionalPdf(cycle) ? "追加" : ""}【一括注文】${cycle.year}年${String(cycle.month).padStart(2, "0")}月分`;
+function orderEmailSubject(cycle: Record<string, string | number>, isAdditionalOrder = isAdditionalPdf(cycle)) {
+  return `${isAdditionalOrder ? "追加" : ""}【一括注文】${cycle.year}年${String(cycle.month).padStart(2, "0")}月分`;
 }
 
 app.get("/api/admin/cycles/:id/pdf", async (c) => {
@@ -530,15 +530,16 @@ async function recordTendoSend(env: Env, cycleId: number, channel: "tendo" | "em
     .bind(cycleId, channel, automatic ? "automatic" : "manual", status, detail.slice(0, 500), now()).run();
 }
 
-async function sendNotificationEmail(env: Env, cycleId: number, automatic = false) {
+async function sendNotificationEmail(env: Env, cycleId: number, automatic = false, isAdditionalOrder?: boolean) {
   if (!env.RESEND_API_KEY || !env.RESEND_FROM) throw new Error("通知メールの送信設定がまだ完了していません。");
   const data = await pdfData(env, cycleId);
+  const additional = isAdditionalOrder ?? isAdditionalPdf(data.cycle);
   const label = `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`;
-  const bytes = await createOrderPdf({ label, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: isAdditionalPdf(data.cycle), fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
+  const bytes = await createOrderPdf({ label, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: additional, fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: env.RESEND_FROM, to: [env.TENDO_NOTIFICATION_EMAIL], subject: orderEmailSubject(data.cycle), html: `<p>${label}の道具一括注文書を添付します。</p>`, attachments: [{ filename: orderPdfFilename(data.cycle), content: toBase64(new Uint8Array(bytes)) }] })
+    body: JSON.stringify({ from: env.RESEND_FROM, to: [env.TENDO_NOTIFICATION_EMAIL], subject: orderEmailSubject(data.cycle, additional), html: `<p>${label}の道具一括注文書を添付します。</p>`, attachments: [{ filename: orderPdfFilename(data.cycle, additional), content: toBase64(new Uint8Array(bytes)) }] })
   });
   if (!response.ok) {
     const message = `通知メールの送信に失敗しました（HTTP ${response.status}）`;
@@ -550,12 +551,13 @@ async function sendNotificationEmail(env: Env, cycleId: number, automatic = fals
   await recordTendoSend(env, cycleId, "email", automatic, "success", `HTTP ${response.status} / ${env.TENDO_NOTIFICATION_EMAIL}へ送信`);
 }
 
-async function sendTendoPdf(env: Env, cycleId: number, automatic = true) {
+async function sendTendoPdf(env: Env, cycleId: number, automatic = true, isAdditionalOrder?: boolean) {
   const data = await pdfData(env, cycleId);
-  const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: isAdditionalPdf(data.cycle), fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
+  const additional = isAdditionalOrder ?? isAdditionalPdf(data.cycle);
+  const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: additional, fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
   const form = new FormData();
   form.set("name", env.TENDO_SENDER_NAME); form.set("dendokai", env.TENDO_FELLOWSHIP_NAME); form.set("title", `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月 道具一括注文書`); form.set("text", "道具一括注文書を送信します。"); form.set(env.TENDO_DESTINATION || "mirokuji", "送信");
-  form.set("up_file[]", new File([new Uint8Array(bytes).buffer], orderPdfFilename(data.cycle), { type: "application/pdf" }));
+  form.set("up_file[]", new File([new Uint8Array(bytes).buffer], orderPdfFilename(data.cycle, additional), { type: "application/pdf" }));
   const response = await fetch(env.TENDO_UPLOAD_URL, { method: "POST", body: form });
   if (!response.ok) {
     const message = `天道へのPDF送信に失敗しました（HTTP ${response.status}）`;
@@ -588,8 +590,11 @@ app.post("/api/admin/cycles/:id/tendo", async (c) => {
     requireAdmin(c); requireCsrf(c);
     const cycleId = Number(c.req.param("id"));
     if (!cycleId) return jsonError("注文サイクルが見つかりません。", 404);
-    await sendTendoPdf(c.env, cycleId, false);
-    await sendNotificationEmail(c.env, cycleId, false);
+    const cycleBeforeSend = await c.env.DB.prepare("SELECT additional_order_until, tendo_sent_at FROM order_cycles WHERE id=?").bind(cycleId).first<Record<string, string | number | null>>();
+    if (!cycleBeforeSend) return jsonError("注文サイクルが見つかりません。", 404);
+    const isAdditionalOrder = isAdditionalPdf(cycleBeforeSend);
+    await sendTendoPdf(c.env, cycleId, false, isAdditionalOrder);
+    await sendNotificationEmail(c.env, cycleId, false, isAdditionalOrder);
     const cycle = await c.env.DB.prepare("SELECT additional_order_until FROM order_cycles WHERE id=?").bind(cycleId).first<{ additional_order_until: string | null }>();
     const additionalOrderClosed = Boolean(cycle?.additional_order_until && new Date(cycle.additional_order_until) > new Date());
     if (additionalOrderClosed) await c.env.DB.prepare("UPDATE order_cycles SET additional_order_until=NULL, updated_at=? WHERE id=?").bind(now(), cycleId).run();
@@ -618,11 +623,12 @@ app.post("/api/admin/cycles/:id/additional-order", async (c) => {
 
 async function scheduledSend(env: Env) {
   const emailEnabled = Boolean(env.RESEND_API_KEY && env.RESEND_FROM);
-  const cycles = await env.DB.prepare("SELECT id, tendo_sent_at, tendo_auto_email_sent_at FROM order_cycles WHERE tendo_send_at IS NOT NULL AND tendo_send_at <= ? AND (tendo_sent_at IS NULL OR (? = 1 AND tendo_auto_email_sent_at IS NULL))").bind(now(), emailEnabled ? 1 : 0).all<{ id: number; tendo_sent_at: string | null; tendo_auto_email_sent_at: string | null }>();
+  const cycles = await env.DB.prepare("SELECT id, tendo_sent_at, tendo_auto_email_sent_at, additional_order_until FROM order_cycles WHERE tendo_send_at IS NOT NULL AND tendo_send_at <= ? AND (tendo_sent_at IS NULL OR (? = 1 AND tendo_auto_email_sent_at IS NULL))").bind(now(), emailEnabled ? 1 : 0).all<{ id: number; tendo_sent_at: string | null; tendo_auto_email_sent_at: string | null; additional_order_until: string | null }>();
   for (const cycle of cycles.results) {
     try {
-      if (!cycle.tendo_sent_at) await sendTendoPdf(env, cycle.id, true);
-      if (emailEnabled && !cycle.tendo_auto_email_sent_at) await sendNotificationEmail(env, cycle.id, true);
+      const isAdditionalOrder = Boolean(cycle.tendo_sent_at && cycle.additional_order_until);
+      if (!cycle.tendo_sent_at) await sendTendoPdf(env, cycle.id, true, isAdditionalOrder);
+      if (emailEnabled && !cycle.tendo_auto_email_sent_at) await sendNotificationEmail(env, cycle.id, true, isAdditionalOrder);
     } catch (error) { await env.DB.prepare("UPDATE order_cycles SET tendo_send_error=?, updated_at=? WHERE id=?").bind(error instanceof Error ? error.message.slice(0, 500) : "PDF送信に失敗しました。", now(), cycle.id).run(); }
   }
   await env.DB.prepare("DELETE FROM sessions WHERE expires_at <= ?").bind(now()).run();

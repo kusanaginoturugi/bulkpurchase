@@ -339,7 +339,7 @@ app.get("/api/current-order", async (c) => {
   return c.json({
     admin: loggedInUser.role === "admin",
     fellowships: availableFellowships,
-    cycle: { id: cycle.id, label: `${cycle.year}年${String(cycle.month).padStart(2, "0")}月`, orderDate: cycle.order_date, arrivalDate: cycle.arrival_date, deadlineDate: new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", year: "numeric", month: "long", day: "numeric", weekday: "short" }).format(deadline), deadlineTime: new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", hour: "2-digit", minute: "2-digit", hour12: false }).format(deadline), additionalOrderUntil: cycle.additional_order_until || null },
+    cycle: { id: cycle.id, label: `${cycle.year}年${String(cycle.month).padStart(2, "0")}月分`, orderDate: cycle.order_date, arrivalDate: cycle.arrival_date, deadlineDate: new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", year: "numeric", month: "long", day: "numeric", weekday: "short" }).format(deadline), deadlineTime: new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", hour: "2-digit", minute: "2-digit", hour12: false }).format(deadline), additionalOrderUntil: cycle.additional_order_until || null },
     order: { fellowshipId: fellowship.id, fellowshipLabel: displayName(fellowship), ordererName: order?.orderer_name || loggedInUser.name, pickupName: order?.pickup_name || "", status: order?.status || "draft", registered: Boolean(order), items }
   });
 });
@@ -404,7 +404,7 @@ app.get("/api/orders", async (c) => {
     c.env.DB.prepare("SELECT year, month FROM order_cycles WHERE deadline_at < ? ORDER BY year DESC, month DESC").bind(now()).all<{ year: number; month: number }>(),
     admin ? c.env.DB.prepare(itemQuery).all<Record<string, string | number | null>>() : c.env.DB.prepare(itemQuery).bind(loggedInUser.fellowshipId).all<Record<string, string | number | null>>()
   ]);
-  const label = (year: number, month: number) => `${year}年${String(month).padStart(2, "0")}月`;
+  const label = (year: number, month: number) => `${year}年${String(month).padStart(2, "0")}月分`;
   const months = new Map<string, { label: string; year: number; month: number }>();
   [...rows.results, ...pastCycles.results].forEach((entry) => months.set(label(Number(entry.year), Number(entry.month)), { label: label(Number(entry.year), Number(entry.month)), year: Number(entry.year), month: Number(entry.month) }));
   const itemsByOrder = new Map<number, Array<{ itemName: string; variantName: string; quantity: number; unit: string }>>();
@@ -414,7 +414,7 @@ app.get("/api/orders", async (c) => {
     values.push({ itemName: String(entry.item_name), variantName: String(entry.variant_name || ""), quantity: Number(entry.quantity), unit: String(entry.unit) });
     itemsByOrder.set(orderId, values);
   });
-  return c.json({ months: [...months.values()].sort((a, b) => b.year - a.year || b.month - a.month).map((entry) => entry.label), orders: rows.results.map((entry) => ({ id: Number(entry.id), label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, fellowship: `${entry.code} ${entry.fellowship_name}`, ordererName: entry.orderer_name, status: entry.status === "submitted" ? "提出済み" : "下書き", submittedAt: japanMonthDay(entry.submitted_at), items: itemsByOrder.get(Number(entry.id)) ?? [] })) });
+  return c.json({ months: [...months.values()].sort((a, b) => b.year - a.year || b.month - a.month).map((entry) => entry.label), orders: rows.results.map((entry) => ({ id: Number(entry.id), label: `${entry.year}年${String(entry.month).padStart(2, "0")}月分`, fellowship: `${entry.code} ${entry.fellowship_name}`, ordererName: entry.orderer_name, status: entry.status === "submitted" ? "提出済み" : "下書き", submittedAt: japanMonthDay(entry.submitted_at), items: itemsByOrder.get(Number(entry.id)) ?? [] })) });
 });
 
 app.get("/api/admin/bootstrap", async (c) => {
@@ -435,7 +435,7 @@ app.get("/api/admin/bootstrap", async (c) => {
       values.push({ itemName: String(entry.item_name), variantName: String(entry.variant_name || ""), quantity: Number(entry.quantity), unit: String(entry.unit) });
       itemsByOrder.set(orderId, values);
     });
-    return c.json({ cycles: cycles.results.map((entry) => ({ id: entry.id, label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, deadlineAt: entry.deadline_at, deadlineLabel: deadlineLabel(String(entry.deadline_at)), arrivalDate: entry.arrival_date, status: entry.status === "open" ? "受付中" : entry.status === "closed" ? "締切" : "送信済み", tendoSendAt: entry.tendo_send_at, tendoSendLabel: entry.tendo_send_at ? deadlineLabel(String(entry.tendo_send_at)) : "未設定", tendoSentAt: entry.tendo_sent_at, tendoSendError: entry.tendo_send_error })), orders: orders.results.map((entry) => ({ label: `${entry.year}年${String(entry.month).padStart(2, "0")}月`, fellowship: `${entry.code} ${entry.fellowship_name}`, ordererName: entry.orderer_name, status: entry.status === "submitted" ? "提出済み" : "下書き", items: itemsByOrder.get(Number(entry.id)) ?? [] })), items: items.results, users: users.results.map((entry) => ({ name: entry.name, email: entry.email, role: entry.role === "admin" ? "管理者" : "利用者", fellowship: `${entry.code} ${entry.fellowship_name}` })), fellowships: fellowshipRows });
+    return c.json({ cycles: cycles.results.map((entry) => ({ id: entry.id, label: `${entry.year}年${String(entry.month).padStart(2, "0")}月分`, deadlineAt: entry.deadline_at, deadlineLabel: deadlineLabel(String(entry.deadline_at)), arrivalDate: entry.arrival_date, status: entry.status === "open" ? "受付中" : entry.status === "closed" ? "締切" : "送信済み", tendoSendAt: entry.tendo_send_at, tendoSendLabel: entry.tendo_send_at ? deadlineLabel(String(entry.tendo_send_at)) : "未設定", tendoSentAt: entry.tendo_sent_at, tendoSendError: entry.tendo_send_error })), orders: orders.results.map((entry) => ({ label: `${entry.year}年${String(entry.month).padStart(2, "0")}月分`, fellowship: `${entry.code} ${entry.fellowship_name}`, ordererName: entry.orderer_name, status: entry.status === "submitted" ? "提出済み" : "下書き", items: itemsByOrder.get(Number(entry.id)) ?? [] })), items: items.results, users: users.results.map((entry) => ({ name: entry.name, email: entry.email, role: entry.role === "admin" ? "管理者" : "利用者", fellowship: `${entry.code} ${entry.fellowship_name}` })), fellowships: fellowshipRows });
   } catch (error) {
     return jsonError(error instanceof Error ? error.message : "管理情報を取得できませんでした。", 403);
   }
@@ -499,7 +499,7 @@ async function pdfData(env: Env, cycleId: number) {
 }
 
 function orderPdfFilename(cycle: Record<string, string | number>, isAdditionalOrder = isAdditionalPdf(cycle)) {
-  const label = `${cycle.year}年${String(cycle.month).padStart(2, "0")}月`;
+  const label = `${cycle.year}年${String(cycle.month).padStart(2, "0")}月分`;
   return `${isAdditionalOrder ? "追加" : ""}【一括注文】${label}分@聖明王院.pdf`;
 }
 
@@ -511,7 +511,7 @@ app.get("/api/admin/cycles/:id/pdf", async (c) => {
   try {
     requireAdmin(c);
     const data = await pdfData(c.env, Number(c.req.param("id")));
-    const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: isAdditionalPdf(data.cycle), fellowships: data.fellowships, rows: data.rows }, c.env.BROWSER);
+    const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月分`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: isAdditionalPdf(data.cycle), fellowships: data.fellowships, rows: data.rows }, c.env.BROWSER);
     const filename = orderPdfFilename(data.cycle);
     return new Response(new Uint8Array(bytes).buffer, { headers: { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="bulk-order.pdf"; filename*=UTF-8''${encodeURIComponent(filename)}` } });
   } catch (error) { return c.text(error instanceof Error ? error.message : "PDFを出力できませんでした。", 422); }
@@ -534,7 +534,7 @@ async function sendNotificationEmail(env: Env, cycleId: number, automatic = fals
   if (!env.RESEND_API_KEY || !env.RESEND_FROM) throw new Error("通知メールの送信設定がまだ完了していません。");
   const data = await pdfData(env, cycleId);
   const additional = isAdditionalOrder ?? isAdditionalPdf(data.cycle);
-  const label = `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`;
+  const label = `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月分`;
   const bytes = await createOrderPdf({ label, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: additional, fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -554,7 +554,7 @@ async function sendNotificationEmail(env: Env, cycleId: number, automatic = fals
 async function sendTendoPdf(env: Env, cycleId: number, automatic = true, isAdditionalOrder?: boolean) {
   const data = await pdfData(env, cycleId);
   const additional = isAdditionalOrder ?? isAdditionalPdf(data.cycle);
-  const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: additional, fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
+  const bytes = await createOrderPdf({ label: `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月分`, orderDate: String(data.cycle.order_date), arrivalDate: String(data.cycle.arrival_date), isAdditionalOrder: additional, fellowships: data.fellowships, rows: data.rows }, env.BROWSER);
   const form = new FormData();
   form.set("name", env.TENDO_SENDER_NAME); form.set("dendokai", env.TENDO_FELLOWSHIP_NAME); form.set("title", `${data.cycle.year}年${String(data.cycle.month).padStart(2, "0")}月 道具一括注文書`); form.set("text", "道具一括注文書を送信します。"); form.set(env.TENDO_DESTINATION || "mirokuji", "送信");
   form.set("up_file[]", new File([new Uint8Array(bytes).buffer], orderPdfFilename(data.cycle, additional), { type: "application/pdf" }));
@@ -579,8 +579,8 @@ app.get("/api/admin/tendo-status", async (c) => {
       notificationEmail: c.env.TENDO_NOTIFICATION_EMAIL,
       senderName: c.env.TENDO_SENDER_NAME,
       fellowshipName: c.env.TENDO_FELLOWSHIP_NAME,
-      cycles: cycles.results.map((cycle) => ({ id: cycle.id, label: `${cycle.year}年${String(cycle.month).padStart(2, "0")}月`, tendoSendAt: cycle.tendo_send_at, tendoSentAt: cycle.tendo_sent_at, emailSentAt: cycle.tendo_auto_email_sent_at, manualEmailSentAt: cycle.tendo_email_sent_at, error: cycle.tendo_send_error, additionalOrderUntil: cycle.additional_order_until })),
-      logs: logs.results.map((log) => ({ cycleId: log.order_cycle_id, label: `${log.year}年${String(log.month).padStart(2, "0")}月`, channel: log.channel, triggerType: log.trigger_type, status: log.status, detail: log.detail, sentAt: log.sent_at }))
+      cycles: cycles.results.map((cycle) => ({ id: cycle.id, label: `${cycle.year}年${String(cycle.month).padStart(2, "0")}月分`, tendoSendAt: cycle.tendo_send_at, tendoSentAt: cycle.tendo_sent_at, emailSentAt: cycle.tendo_auto_email_sent_at, manualEmailSentAt: cycle.tendo_email_sent_at, error: cycle.tendo_send_error, additionalOrderUntil: cycle.additional_order_until })),
+      logs: logs.results.map((log) => ({ cycleId: log.order_cycle_id, label: `${log.year}年${String(log.month).padStart(2, "0")}月分`, channel: log.channel, triggerType: log.trigger_type, status: log.status, detail: log.detail, sentAt: log.sent_at }))
     });
   } catch (error) { return jsonError(error instanceof Error ? error.message : "送信状況を取得できませんでした。", 403); }
 });

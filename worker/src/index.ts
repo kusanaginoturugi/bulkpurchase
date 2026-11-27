@@ -500,7 +500,7 @@ async function pdfData(env: Env, cycleId: number) {
 
 function orderPdfFilename(cycle: Record<string, string | number>, isAdditionalOrder = isAdditionalPdf(cycle)) {
   const label = `${cycle.year}年${String(cycle.month).padStart(2, "0")}月分`;
-  return `${isAdditionalOrder ? "追加" : ""}【一括注文】${label}分@聖明王院.pdf`;
+  return `${isAdditionalOrder ? "追加" : ""}【一括注文】${label}@聖明王院.pdf`;
 }
 
 function orderEmailSubject(cycle: Record<string, string | number>, isAdditionalOrder = isAdditionalPdf(cycle)) {

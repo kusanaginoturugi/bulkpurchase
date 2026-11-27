@@ -57,7 +57,7 @@ function orderPdfHtml(input: {
   isAdditionalOrder?: boolean;
   fellowships: PdfFellowship[];
   rows: PdfRow[];
-}) {
+}, density = 1) {
   const date = new Date(`${input.arrivalDate}T00:00:00Z`);
   const weekday = ["日", "月", "火", "水", "木", "金", "土"][date.getUTCDay()];
   const arrivalLabel = `${date.getUTCMonth() + 1}月${date.getUTCDate()}日(${weekday})　弥勒大仏殿必着`;
@@ -65,28 +65,30 @@ function orderPdfHtml(input: {
   const tableFontSize = fellowshipCount <= 2 ? 16 : fellowshipCount <= 5 ? 14 : 12;
   const headerFontSize = fellowshipCount <= 2 ? 18 : fellowshipCount <= 5 ? 16 : 13;
   const rowHeight = input.rows.length >= 11 ? 10.5 : input.rows.length >= 9 ? 11.5 : fellowshipCount <= 2 ? 15 : fellowshipCount <= 5 ? 13 : 12;
+  const scale = Math.max(0.18, Math.min(1, density));
+  const compactMargin = Math.max(4, 11 * scale);
   const headers = input.fellowships.map((fellowship) => `<th>${escapeHtml(fellowship.name)}</th>`).join("");
   const rows = input.rows.length
     ? input.rows.map((row) => { const added = Boolean(row.addedFellowshipIds?.length); return `<tr><td class="item${added ? " added" : ""}">${htmlItemName(`${row.name}${row.unit === "組" ? "(組)" : ""}`)}</td>${input.fellowships.map((fellowship) => `<td class="${row.addedFellowshipIds?.includes(fellowship.id) ? "added" : ""}">${row.quantities[fellowship.id] || ""}</td>`).join("")}<td class="total${added ? " added" : ""}">${row.total}</td></tr>`; }).join("")
     : `<tr><td class="empty" colspan="${input.fellowships.length + 2}">提出済みの注文はありません</td></tr>`;
 
   return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;500;700&display=block" rel="stylesheet"><style>
-    @page { size: A4 landscape; margin: 11mm 10mm; }
+    @page { size: A4 landscape; margin: ${compactMargin}mm 10mm; }
     * { box-sizing: border-box; } html,body { margin:0; padding:0; color:#161616; background:#fff; }
     body { font-family:"Noto Serif JP","Yu Mincho",serif; } .sheet { width:100%; }
-    .title-line { position:relative; } h1 { margin:0; text-align:center; font-family:"Noto Sans JP",sans-serif; font-size:24pt; line-height:1.3; font-weight:700; letter-spacing:.04em; } .additional { position:absolute; left:0; top:0; color:#a71d1d; font-family:"Noto Sans JP",sans-serif; font-size:32pt; line-height:1; font-weight:700; }
-    .meta { margin:2mm 0 3mm; display:flex; justify-content:space-between; align-items:center; font-family:"Noto Sans JP",sans-serif; font-size:15pt; font-weight:700; }
-    table { width:100%; border-collapse:collapse; table-layout:fixed; border:1.2pt solid #242424; font-size:${tableFontSize}pt; }
-    th,td { border:.55pt solid #333; vertical-align:middle; text-align:center; line-height:1.2; padding:1.1mm 1.2mm; }
-    th { background:#f2f0ec; height:${rowHeight + 3}mm; font-size:${headerFontSize}pt; font-weight:700; } td { height:${rowHeight}mm; } th:first-child,td.item { width:31%; }
-    th:last-child,td.total { width:8%; } td.item { padding:1.2mm 3mm; font-size:${tableFontSize}pt; white-space:nowrap; } .item-label { white-space:nowrap; } .item-label .variant { font-family:"Noto Sans JP",sans-serif; font-weight:700; } td.total { font-family:"Noto Sans JP",sans-serif; font-weight:400; } td.added { font-family:"Noto Sans JP",sans-serif; font-weight:700; }
-    tr { break-inside:avoid; } .empty { height:25mm; color:#555; } .footer { margin-top:3mm; text-align:right; font-family:"Noto Sans JP",sans-serif; font-size:8.5pt; color:#555; }
+    .title-line { position:relative; } h1 { margin:0; text-align:center; font-family:"Noto Sans JP",sans-serif; font-size:${24 * scale}pt; line-height:1.3; font-weight:700; letter-spacing:.04em; } .additional { position:absolute; left:0; top:0; color:#a71d1d; font-family:"Noto Sans JP",sans-serif; font-size:${32 * scale}pt; line-height:1; font-weight:700; }
+    .meta { margin:${2 * scale}mm 0 ${3 * scale}mm; display:flex; justify-content:space-between; align-items:center; font-family:"Noto Sans JP",sans-serif; font-size:${15 * scale}pt; font-weight:700; }
+    table { width:100%; border-collapse:collapse; table-layout:fixed; border:1.2pt solid #242424; font-size:${tableFontSize * scale}pt; }
+    th,td { border:.55pt solid #333; vertical-align:middle; text-align:center; line-height:1.14; padding:${1.1 * scale}mm ${1.2 * scale}mm; }
+    th { background:#f2f0ec; height:${(rowHeight + 3) * scale}mm; font-size:${headerFontSize * scale}pt; font-weight:700; } td { height:${rowHeight * scale}mm; } th:first-child,td.item { width:31%; }
+    th:last-child,td.total { width:8%; } td.item { padding:${1.2 * scale}mm ${3 * scale}mm; font-size:${tableFontSize * scale}pt; white-space:nowrap; } .item-label { white-space:nowrap; } .item-label .variant { font-family:"Noto Sans JP",sans-serif; font-weight:700; } td.total { font-family:"Noto Sans JP",sans-serif; font-weight:400; } td.added { font-family:"Noto Sans JP",sans-serif; font-weight:700; }
+    tr { break-inside:avoid; } .empty { height:${25 * scale}mm; color:#555; } .footer { margin-top:${3 * scale}mm; text-align:right; font-family:"Noto Sans JP",sans-serif; font-size:${8.5 * scale}pt; color:#555; }
   </style></head><body><main class="sheet"><div class="title-line"><h1>聖明王院　一括道具注文書</h1>${input.isAdditionalOrder ? '<strong class="additional">追加</strong>' : ""}</div><div class="meta"><span>注文日　${escapeHtml(monthDay(input.orderDate))}</span><span>${escapeHtml(arrivalLabel)}</span></div><table><thead><tr><th>道具名</th>${headers}<th>合計</th></tr></thead><tbody>${rows}</tbody></table><div class="footer">聖明王院 道具一括注文</div></main></body></html>`;
 }
 
-async function createStyledOrderPdf(browser: BrowserRun, input: Parameters<typeof orderPdfHtml>[0]) {
+async function createStyledOrderPdf(browser: BrowserRun, input: Parameters<typeof orderPdfHtml>[0], density = 1) {
   const response = await browser.quickAction("pdf", {
-    html: orderPdfHtml(input),
+    html: orderPdfHtml(input, density),
     gotoOptions: { waitUntil: "networkidle0", timeout: 45_000 },
     pdfOptions: { format: "a4", landscape: true, printBackground: true, preferCSSPageSize: true, margin: { top: "0", right: "0", bottom: "0", left: "0" } }
   });
@@ -103,16 +105,20 @@ export async function createOrderPdf(input: {
   rows: PdfRow[];
 }, browser?: BrowserRun) {
   if (browser) {
-    try {
-      return await createStyledOrderPdf(browser, input);
-    } catch (error) {
-      console.warn("ブラウザ描画PDFを予備の帳票へ切り替えました。", error);
+    for (const density of [1, 0.78, 0.62, 0.48, 0.36, 0.26, 0.18]) {
+      try {
+        const bytes = await createStyledOrderPdf(browser, input, density);
+        if ((await PDFDocument.load(bytes)).getPageCount() === 1) return bytes;
+      } catch (error) {
+        console.warn("ブラウザ描画PDFを予備の帳票へ切り替えました。", error);
+        break;
+      }
     }
   }
   const document = await PDFDocument.create();
   document.registerFontkit(fontkit);
   const font = await document.embedFont(fontBytes(), { subset: true });
-  let page = document.addPage([pageWidth, pageHeight]);
+  const page = document.addPage([pageWidth, pageHeight]);
   const { width } = page.getSize();
   const margin = 24;
   const nameWidth = 150;
@@ -138,20 +144,19 @@ export async function createOrderPdf(input: {
   text(arrivalLabel, margin, y, 15, "right", width - margin * 2);
   y -= 29;
 
+  const rowHeight = (y - 28) / Math.max(input.rows.length + 1, 1);
   const drawRow = (cells: string[], headerRow = false) => {
-    const height = 37;
-    if (y - height < 28) {
-      page = document.addPage([pageWidth, pageHeight]);
-      y = pageHeight - 30;
-    }
+    const height = rowHeight;
+    const maxLines = Math.max(...cells.map((cell) => cell.split("\n").length));
+    const size = Math.max(4, Math.min(headerRow ? 11 : 12, (height - 9) / Math.max(maxLines, 1) - 1));
     let x = margin;
     cells.forEach((cell, index) => {
       const cellWidth = widths[index];
       page.drawRectangle({ x, y: y - height, width: cellWidth, height, borderWidth: 0.8, borderColor: rgb(0, 0, 0) });
       const lines = cell.split("\n");
-      const size = headerRow ? 11 : 12;
       lines.forEach((line, lineIndex) => {
-        const rowTop = y - 7 - lineIndex * (size + 1);
+        const lineBlockHeight = lines.length * (size + 1);
+        const rowTop = y - (height - lineBlockHeight) / 2 - lineIndex * (size + 1);
         const numeric = !headerRow && index > 0;
         const numericBox = Math.max(28, cellWidth * 0.52);
         const textX = numeric ? x + (cellWidth - numericBox) / 2 : x + 4;
